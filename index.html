@@ -1,201 +1,2906 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bakushin</title>
-    <link rel="stylesheet" href="./style.css">
-    <link rel="stylesheet" href="./base.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#FAF4E6">
+  <meta name="description" content="Une carte d'anniversaire pour Tonton Rado.">
+  <title>Joyeux anniversaire, Tonton Rado</title>
 
+  <!-- ============================================================
+       POLICES
+       ============================================================ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet">
+
+  <!-- ============================================================
+       TAILWIND (CDN) + THÈME
+       ============================================================ -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: '#FAF4E6',
+            parchment: '#EFE3C8',
+            line: '#D9C6A0',
+            gold: '#C9A24D',
+            'gold-brown': '#8A6A3B',
+            terracotta: '#E8704F',
+            'terracotta-dark': '#B8452B',
+            ink: '#2A2623',
+          },
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- ============================================================
+       STYLE CUSTOM : décor, scènes, animations
+       ============================================================ -->
+  <style>
+    /* ---------- 1. Tokens & base ---------- */
+    :root {
+      --cream: #FAF4E6;
+      --parchment: #EFE3C8;
+      --line: #D9C6A0;
+      --gold: #C9A24D;
+      --gold-brown: #8A6A3B;
+      --terracotta: #E8704F;
+      --terracotta-dark: #B8452B;
+      --ink: #2A2623;
+      --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      --ease: cubic-bezier(.22, 1, .36, 1);
+    }
+
+    html { background: var(--cream); }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow: hidden;
+      background: var(--cream);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    ::selection { background: rgba(201, 162, 77, .28); }
+
+    :focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+    }
+
+    /* ---------- 2. Fonds : crème + halo + texture de points ---------- */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(120% 95% at 50% 34%, #F6E6D2 0%, #FBF5E8 46%, #FAF4E6 74%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: .3;
+      background-image: radial-gradient(rgba(138, 106, 59, .16) .55px, transparent .55px);
+      background-size: 6px 6px;
+    }
+
+    /* Cadre doré très discret, commun aux trois scènes */
+    .frame {
+      position: fixed;
+      inset: 10px;
+      z-index: 40;
+      border: 1px solid rgba(201, 162, 77, .32);
+      border-radius: 2px;
+      pointer-events: none;
+    }
+    .frame::before {
+      content: "";
+      position: absolute;
+      inset: 5px;
+      border: 1px solid rgba(201, 162, 77, .14);
+    }
+
+    /* ---------- 3. Moteur de scènes ---------- */
+    #app {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      height: 100dvh;
+    }
+
+    .scene {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding:
+        calc(1.9rem + env(safe-area-inset-top))
+        1.35rem
+        calc(1.9rem + env(safe-area-inset-bottom));
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      opacity: 0;
+      transform: scale(.985);
+      pointer-events: none;
+      transition: opacity .6s var(--ease), transform .6s var(--ease);
+      will-change: opacity, transform;
+      scrollbar-width: none;
+    }
+    .scene::-webkit-scrollbar { width: 0; height: 0; }
+
+    .scene.is-active {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+      z-index: 10;
+    }
+
+    .scene-inner {
+      margin: auto;
+      width: 100%;
+      max-width: 26rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* ---------- 4. Typographie ---------- */
+    .eyebrow {
+      font-family: var(--font-sans);
+      font-size: .64rem;
+      font-weight: 500;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: var(--gold-brown);
+    }
+
+    .display {
+      font-family: var(--font-serif);
+      font-weight: 500;
+      font-size: clamp(2.7rem, 12vw, 4.6rem);
+      line-height: .92;
+      letter-spacing: -.012em;
+      color: var(--ink);
+    }
+
+    .serif-italic {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.18rem;
+      line-height: 1.3;
+      color: var(--gold-brown);
+    }
+
+    .serif-title {
+      font-family: var(--font-serif);
+      font-weight: 500;
+      font-size: clamp(1.9rem, 7vw, 2.35rem);
+      line-height: 1.05;
+      color: var(--ink);
+    }
+
+    /* Ornements : — ✦ — */
+    .ornament {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .7rem;
+      color: var(--gold);
+      font-size: .68rem;
+      line-height: 1;
+    }
+    .ornament::before,
+    .ornament::after {
+      content: "";
+      width: 44px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold));
+    }
+    .ornament::after {
+      background: linear-gradient(to left, transparent, var(--gold));
+    }
+
+    /* ---------- 5. Surfaces parchemin ---------- */
+    .paper {
+      position: relative;
+      background-color: var(--parchment);
+      background-image: radial-gradient(rgba(138, 106, 59, .13) .6px, transparent .6px);
+      background-size: 5px 5px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow:
+        0 34px 70px -38px rgba(42, 38, 35, .45),
+        inset 0 1px 0 rgba(255, 255, 255, .55);
+    }
+    .paper::after {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border: 1px solid rgba(201, 162, 77, .22);
+      border-radius: 6px;
+      pointer-events: none;
+    }
+
+    .hint {
+      font-size: .78rem;
+      line-height: 1.65;
+      color: var(--gold-brown);
+    }
+    .hint small {
+      display: block;
+      margin-top: .18rem;
+      font-size: .64rem;
+      letter-spacing: .05em;
+      opacity: .8;
+    }
+
+    /* ---------- 6. Scène 1 : cadeau ---------- */
+    .svg-sprite {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .gift-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .55rem;
+      min-height: 44px;
+      padding: .35rem .5rem;
+      border: 0;
+      background: none;
+      color: inherit;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .gift-svg {
+      display: block;
+      width: clamp(196px, 54vw, 264px);
+      height: auto;
+      overflow: visible;
+      filter: drop-shadow(0 18px 22px rgba(184, 69, 43, .08));
+    }
+
+    .gift-svg--final {
+      width: clamp(232px, 64vw, 332px);
+      filter: drop-shadow(0 26px 34px rgba(184, 69, 43, .10));
+    }
+
+    .gift-shake {
+      display: inline-block;
+      transform-origin: 50% 92%;
+      animation: gift-shake 4.8s var(--ease) infinite;
+    }
+
+    .tap-hint {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      color: var(--gold-brown);
+      font-size: .6rem;
+      font-weight: 500;
+      letter-spacing: .24em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .tap-hint::before,
+    .tap-hint::after {
+      content: "";
+      width: 34px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold));
+    }
+    .tap-hint::after {
+      background: linear-gradient(to left, transparent, var(--gold));
+    }
+
+    .countdown {
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: .18em;
+      font-variant-numeric: tabular-nums;
+      color: var(--gold-brown);
+    }
+    .countdown.is-expired {
+      color: var(--terracotta-dark);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-size: .78rem;
+    }
+
+    /* Étoiles scintillantes */
+    .seal-initial {
+      font-family: var(--font-serif);
+      font-weight: 600;
+    }
+
+    .sparkle {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: twinkle 3.6s ease-in-out infinite;
+    }
+    .sparkle--b { animation-delay: 1.2s; }
+    .sparkle--c { animation-delay: 2.2s; }
+
+    /* ---------- 7. Scène 2 : code PIN ---------- */
+    .pin-fields {
+      display: flex;
+      justify-content: center;
+      gap: .6rem;
+    }
+
+    .pin-field {
+      width: 3rem;
+      height: 3.8rem;
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: .5rem;
+      background: rgba(250, 244, 230, .62);
+      color: var(--ink);
+      text-align: center;
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      font-weight: 500;
+      line-height: 1;
+      caret-color: var(--gold-brown);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .pin-field:focus,
+    .pin-field:focus-visible {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201, 162, 77, .18);
+    }
+
+    .pin-fields.is-error { animation: pin-shake .4s ease both; }
+    .pin-fields.is-error .pin-field {
+      border-color: var(--terracotta-dark);
+      box-shadow: 0 0 0 3px rgba(184, 69, 43, .14);
+    }
+
+    .pin-status {
+      min-height: 1.25rem;
+      margin-top: .7rem;
+      font-size: .7rem;
+      letter-spacing: .03em;
+      line-height: 1.4;
+      color: var(--terracotta-dark);
+    }
+    .pin-status.is-success { color: var(--gold-brown); }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 46px;
+      padding: .75rem 1.5rem;
+      border: 1px solid var(--terracotta-dark);
+      border-radius: 999px;
+      background: var(--terracotta);
+      color: #FFF8F0;
+      font-family: var(--font-sans);
+      font-size: .66rem;
+      font-weight: 600;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 14px 26px -14px rgba(184, 69, 43, .6);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-primary:hover { background: #E2643F; }
+    .btn-primary:active { transform: translateY(1px); }
+
+    /* ---------- 8. Scène 3 : ouverture & titre ---------- */
+    .gift-lid {
+      transform-box: view-box;
+      transform-origin: 120px 128px;
+    }
+    #scene-final .gift-lid {
+      transition: transform .95s var(--ease), opacity .7s ease .12s;
+    }
+    #scene-final.is-open .gift-lid {
+      transform: translateY(-30px) rotate(-11deg);
+      opacity: 0;
+    }
+
+    .gift-halo {
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+      transform: scale(.72);
+      transition: transform 1s var(--ease), opacity .7s ease;
+    }
+    #scene-final.is-open .gift-halo {
+      opacity: 1;
+      transform: scale(1.08);
+    }
+
+    .final-gift {
+      position: relative;
+      z-index: 20;
+      margin-top: .25rem;
+    }
+
+    /* ---------- 8b. Séquence : cartes, textes, boutons ---------- */
+    .story-scene {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      padding-top: calc(4.4rem + env(safe-area-inset-top));
+      /* Le rideau masque le changement de scène : aucun fondu parasite. */
+      transition: none;
+    }
+
+    .story-stage {
+      align-self: center;
+      justify-self: center;
+      width: 100%;
+      max-width: 34rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .story-stage--narrow { max-width: 30rem; }
+
+    .story-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+      padding: 1rem 1.05rem;
+      border-radius: 12px;
+    }
+
+    .story-visual {
+      flex: 0 0 33%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+    }
+    .story-svg {
+      display: block;
+      width: 100%;
+      max-width: 132px;
+      height: auto;
+      overflow: visible;
+    }
+
+    .story-copy {
+      flex: 1 1 auto;
+      min-width: 0;
+      margin: 0;
+      font-family: var(--font-serif);
+      font-size: clamp(1.05rem, 4.4vw, 1.5rem);
+      line-height: 1.3;
+      color: var(--ink);
+      text-align: left;
+      text-wrap: pretty;
+    }
+    .story-copy--wish { font-style: italic; }
+    .story-copy-block {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .story-translation {
+      margin: .3rem 0 0;
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(.72rem, 2.6vw, .86rem);
+      line-height: 1.35;
+      color: var(--gold-brown);
+      text-wrap: pretty;
+    }
+
+    .story-card--reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      pointer-events: none;
+      transition: opacity .8s var(--ease), transform .8s var(--ease);
+    }
+    .story-card--reveal.is-visible {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    .story-footer {
+      align-self: end;
+      justify-self: center;
+      display: flex;
+      justify-content: center;
+      min-height: 68px;
+      padding-top: 1.1rem;
+    }
+
+    /* Bouton doré luxueux */
+    .gold-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: .9rem 1.7rem;
+      overflow: hidden;
+      isolation: isolate;
+      border: 1px solid #F3E3B0;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #E6C77A 0%, #C9A24D 52%, #A8802F 100%);
+      color: #2A2623;
+      font-family: var(--font-sans);
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow:
+        0 12px 26px -14px rgba(138, 106, 59, .65),
+        inset 0 1px 0 rgba(255, 255, 255, .45);
+      transition: transform .3s var(--ease), opacity .4s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .gold-btn > span { position: relative; z-index: 1; }
+    .gold-btn::before {
+      content: "";
+      position: absolute;
+      top: -30%;
+      bottom: -30%;
+      left: 0;
+      width: 36%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .65), transparent);
+      transform: translateX(-180%) skewX(-20deg);
+      animation: shimmer 4.6s var(--ease) infinite;
+      pointer-events: none;
+    }
+    .gold-btn:hover { transform: translateY(-1px); }
+    .gold-btn:active { transform: scale(.97); }
+    .gold-btn--small {
+      min-height: 44px;
+      padding: .7rem 1.3rem;
+      font-size: .62rem;
+      letter-spacing: .18em;
+    }
+    .gold-btn--small::before { width: 30%; }
+
+    .story-next {
+      color: #FFFFFF;
+      text-shadow: 0 1px 2px rgba(42, 38, 35, .35);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+    }
+    .story-next.is-visible {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+    .story-next.is-visible:hover { transform: translateY(-1px); }
+    .story-next.is-visible:active { transform: scale(.97); }
+
+    .anecdote-more {
+      margin-top: 1.4rem;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+    }
+    .anecdote-more.is-visible {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+    .anecdote-more.is-visible:hover { transform: translateY(-1px); }
+    .anecdote-more.is-visible:active { transform: scale(.97); }
+
+    /* ---------- 8c. Illustrations animées ---------- */
+    .wallet-body {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+    .wallet-fly { opacity: 0; }
+    #scene-story-1.is-playing .wallet-body {
+      animation: wallet-shake 1.35s var(--ease) .15s both;
+    }
+    #scene-story-1.is-playing .wallet-fly {
+      animation: fly-fall 2.7s 1.05s cubic-bezier(.35, 0, .75, .35) both;
+    }
+
+    .laptop-screen {
+      transform-box: fill-box;
+      transform-origin: 50% 100%;
+      transform: perspective(280px) rotateX(-82deg);
+      transition: transform 1.15s var(--ease);
+    }
+    .story-card--reveal.is-visible .laptop-screen {
+      transform: perspective(280px) rotateX(0deg);
+    }
+    .laptop-glow {
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+      transform: scale(.8);
+      transition: opacity .9s ease .3s, transform .9s var(--ease) .3s;
+    }
+    .story-card--reveal.is-visible .laptop-glow {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .code-line { opacity: 0; }
+    .story-card--reveal.is-visible .code-line {
+      animation: code-in .5s ease forwards;
+      animation-delay: calc(.75s + var(--i) * .16s);
+    }
+
+    .cross-enter {
+      transform-box: fill-box;
+      transform-origin: center;
+      opacity: 0;
+      transform: scale(0);
+    }
+    .cross-pulse {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+    #scene-story-2.is-playing .cross-enter {
+      animation: cross-pop .75s var(--ease) both;
+      animation-delay: var(--d, 0s);
+    }
+    #scene-story-2.is-playing .cross-pulse {
+      animation: cross-pulse 3s ease-in-out infinite;
+      animation-delay: var(--pd, 1.2s);
+    }
+
+    .clover-spin {
+      transform-box: fill-box;
+      transform-origin: center;
+      opacity: 0;
+      transform: rotate(-30deg) scale(.6);
+      transition: opacity .7s ease, transform 1.1s var(--ease);
+    }
+    .story-card--reveal.is-visible .clover-spin {
+      opacity: 1;
+      transform: none;
+    }
+    .clover-star {
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+    .story-card--reveal.is-visible .clover-star {
+      animation: clover-twinkle 2.6s ease-in-out infinite;
+      animation-delay: var(--sd, 0s);
+    }
+    .clover-star--b { --sd: .55s; }
+    .clover-star--c { --sd: 1.15s; }
+
+    /* ---------- 8c-bis. Vœux 2 : portefeuille qui se remplit, soleil ---------- */
+    .wallet-coin {
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+    #scene-story-3.is-playing .wallet-coin {
+      animation: coin-drop 2.4s cubic-bezier(.35, 0, .65, 1) infinite;
+      animation-delay: var(--cd, 0s);
+    }
+
+    .wallet-swell {
+      transform-box: fill-box;
+      transform-origin: 50% 100%;
+    }
+    #scene-story-3.is-playing .wallet-swell {
+      animation: wallet-swell 3.6s var(--ease) .2s infinite;
+    }
+
+    .wallet-pile {
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+      transform: scale(.6);
+    }
+    #scene-story-3.is-playing .wallet-pile {
+      animation: pile-in .6s var(--ease) 1.5s both;
+    }
+
+    .wallet-shine { opacity: 0; }
+    #scene-story-3.is-playing .wallet-shine {
+      animation: wallet-shine 3.6s ease-in-out 1.4s infinite;
+    }
+
+    .wallet-spark {
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+    #scene-story-3.is-playing .wallet-spark {
+      animation: wallet-spark 2.8s ease-in-out 1.7s infinite;
+    }
+
+    .sun-glow {
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+      transform: scale(.78);
+    }
+    .story-card--reveal.is-visible .sun-glow {
+      animation: sun-glow-in .9s ease .15s both;
+    }
+
+    .sun-rays {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+    .story-card--reveal.is-visible .sun-rays {
+      animation: sun-turn 90s linear 1.5s infinite;
+    }
+
+    .sun-ray {
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+    .story-card--reveal.is-visible .sun-ray {
+      animation: ray-in .55s var(--ease) both;
+      animation-delay: var(--rd, 0s);
+    }
+
+    .sun-face {
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+      transform: scale(.78);
+    }
+    .story-card--reveal.is-visible .sun-face {
+      animation: sun-face-in .7s var(--ease) 1.05s both;
+    }
+
+    /* Halo doré qui monte derrière la santé et la chance. */
+    .vitality-aura {
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center bottom;
+      transform: scaleY(.25);
+    }
+    #scene-story-2.is-playing .story-card:not(.story-card--reveal) .vitality-aura,
+    #scene-story-2 .story-card--reveal.is-visible .vitality-aura {
+      animation: vitality-rise 2.8s var(--ease) both;
+    }
+
+    /* ---------- 8d. Anecdote ---------- */
+    .anecdote-card {
+      width: 100%;
+      padding: 2rem 1.5rem 1.5rem;
+      text-align: left;
+    }
+    .anecdote-eyebrow {
+      margin-top: .9rem;
+      color: var(--gold-brown);
+    }
+    .gold-rule {
+      height: 1px;
+      margin: 1rem 0 1.35rem;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .anecdote-line {
+      margin: 0;
+      font-family: var(--font-serif);
+      font-size: clamp(1.2rem, 4.6vw, 1.6rem);
+      line-height: 1.45;
+      color: var(--ink);
+    }
+    .anecdote-line + .anecdote-line { margin-top: .9rem; }
+    .anecdote-line--second { color: var(--gold-brown); }
+
+    .type-caret {
+      display: none;
+      width: 1px;
+      height: 1em;
+      margin-left: .08em;
+      vertical-align: -.12em;
+      background: var(--gold);
+      animation: caret-blink 1s steps(1) infinite;
+    }
+    .anecdote-line.is-typing .type-caret { display: inline-block; }
+
+    /* ---------- 8e. Final : âge ---------- */
+    .final-stage {
+      align-items: center;
+      text-align: center;
+      gap: 0;
+      max-width: 26rem;
+    }
+    .eyebrow--gold { color: var(--gold); }
+
+    .age-wrap {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 100%;
+      margin-top: .35rem;
+    }
+    .age-halo {
+      position: absolute;
+      width: min(72vw, 290px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201, 162, 77, .38), rgba(201, 162, 77, .1) 55%, transparent 72%);
+      animation: halo-pulse 4.2s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .age-number {
+      position: relative;
+      z-index: 1;
+      display: block;
+      font-family: var(--font-serif);
+      font-weight: 500;
+      font-size: clamp(7rem, 25vw, 15rem);
+      line-height: .8;
+      color: var(--terracotta);
+      -webkit-text-stroke: 1px rgba(201, 162, 77, .75);
+      text-shadow: 0 4px 26px rgba(184, 69, 43, .18);
+    }
+    .age-number.is-counting { animation: age-in 2.1s var(--ease) both; }
+    .age-suffix {
+      margin: .15rem 0 0;
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(1.5rem, 5vw, 2.1rem);
+      color: var(--gold-brown);
+    }
+    .final-ornament { margin-top: 1.6rem; }
+    .final-name { margin-top: 1.1rem; }
+    .final-signature { margin-top: .5rem; font-size: 1.05rem; }
+
+    .replay-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      min-height: 44px;
+      padding: .55rem 1.15rem;
+      border: 1px solid rgba(201, 162, 77, .5);
+      border-radius: 999px;
+      background: rgba(239, 227, 200, .45);
+      color: var(--gold-brown);
+      font-family: var(--font-sans);
+      font-size: .62rem;
+      font-weight: 500;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity .45s ease, transform .45s var(--ease);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .replay-btn.is-visible {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    /* ---------- 8f. Rideau ---------- */
+    .curtain {
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      pointer-events: none;
+    }
+    .curtain.is-closed { pointer-events: auto; }
+
+    .curtain-panel {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 50.5vw;
+      background-color: #7A121C;
+      background-image:
+        repeating-linear-gradient(90deg,
+          rgba(255, 255, 255, .055) 0 2px,
+          transparent 2px 22px,
+          rgba(0, 0, 0, .16) 22px 27px,
+          transparent 27px 45px),
+        linear-gradient(90deg, #5E0F17 0%, #8E1B24 28%, #74131C 52%, #8E1B24 76%, #5E0F17 100%);
+      background-size: 45px 100%, 100% 100%;
+      transition: transform 1.2s cubic-bezier(.77, 0, .18, 1);
+      will-change: transform;
+    }
+    .curtain-panel--left {
+      left: 0;
+      transform: translateX(-102%);
+      box-shadow: 18px 0 42px -18px rgba(0, 0, 0, .7);
+    }
+    .curtain-panel--right {
+      right: 0;
+      transform: translateX(102%);
+      box-shadow: -18px 0 42px -18px rgba(0, 0, 0, .7);
+    }
+    .curtain.is-closed .curtain-panel--left,
+    .curtain.is-closed .curtain-panel--right {
+      transform: translateX(0);
+    }
+
+    .curtain-panel::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 28px;
+      width: 9px;
+      background: linear-gradient(90deg, #8A6A3B, #E6C77A 35%, #F3E3B0 50%, #C9A24D 65%, #8A6A3B);
+      box-shadow: 0 0 18px rgba(201, 162, 77, .35);
+    }
+    .curtain-panel--left::before { right: 0; }
+    .curtain-panel--right::before { left: 0; }
+
+    .curtain-panel::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 28px;
+      border-top: 2px solid #E6C77A;
+      background: repeating-linear-gradient(90deg,
+        #C9A24D 0 2px,
+        #E6C77A 2px 4px,
+        #8A6A3B 4px 5px,
+        transparent 5px 10px);
+    }
+
+    /* ---------- 9. Musique ---------- */
+    .music-controls {
+      position: fixed;
+      top: calc(1rem + env(safe-area-inset-top));
+      right: calc(1rem + env(safe-area-inset-right));
+      z-index: 9500;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: .5rem;
+    }
+
+    .icon-btn {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      border: 1px solid rgba(217, 198, 160, .9);
+      border-radius: 999px;
+      background: rgba(239, 227, 200, .66);
+      color: var(--gold-brown);
+      cursor: pointer;
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .icon-btn:hover { background: rgba(239, 227, 200, .95); }
+    .icon { display: block; width: 19px; height: 19px; }
+    .icon-off { display: none; }
+    .icon-btn.is-muted .icon-on { display: none; }
+    .icon-btn.is-muted .icon-off { display: block; }
+
+    .music-fallback {
+      min-height: 44px;
+      margin-top: 0;
+      padding: .65rem 1.15rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(239, 227, 200, .82);
+      color: var(--gold-brown);
+      font-size: .64rem;
+      font-weight: 500;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .music-fallback:hover { background: var(--parchment); }
+
+    .is-hidden { display: none !important; }
+
+    /* ---------- 10. Animations (transform / opacity) ---------- */
+    @keyframes gift-shake {
+      0%, 58%, 100% { transform: rotate(0deg); }
+      8%             { transform: rotate(-3deg); }
+      16%            { transform: rotate(2.6deg); }
+      24%            { transform: rotate(-2.1deg); }
+      32%            { transform: rotate(1.4deg); }
+      40%            { transform: rotate(-.7deg); }
+      48%            { transform: rotate(.3deg); }
+    }
+
+    @keyframes pin-shake {
+      0%, 100% { transform: translateX(0); }
+      15%      { transform: translateX(-8px); }
+      30%      { transform: translateX(7px); }
+      45%      { transform: translateX(-5px); }
+      60%      { transform: translateX(4px); }
+      75%      { transform: translateX(-2px); }
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: .25; transform: scale(.8) rotate(0deg); }
+      50%      { opacity: .9;  transform: scale(1.15) rotate(18deg); }
+    }
+
+    @keyframes shimmer {
+      0%, 18%   { transform: translateX(-180%) skewX(-20deg); }
+      55%, 100% { transform: translateX(520%) skewX(-20deg); }
+    }
+
+    @keyframes wallet-shake {
+      0%, 70%, 100% { transform: rotate(0deg) translateY(0); }
+      14%           { transform: rotate(-6deg) translateY(4px); }
+      28%           { transform: rotate(5deg) translateY(8px); }
+      42%           { transform: rotate(-4deg) translateY(6px); }
+      56%           { transform: rotate(3deg) translateY(10px); }
+    }
+
+    @keyframes fly-fall {
+      0%   { opacity: 0; transform: translate(0, 0) rotate(0deg); }
+      10%  { opacity: 1; }
+      55%  { opacity: 1; transform: translate(8px, 38px) rotate(180deg); }
+      100% { opacity: 0; transform: translate(14px, 70px) rotate(420deg); }
+    }
+
+    @keyframes code-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes cross-pop {
+      0%   { opacity: 0; transform: scale(0); }
+      65%  { opacity: 1; transform: scale(1.2); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes cross-pulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.07); }
+    }
+
+    @keyframes clover-twinkle {
+      0%, 100% { opacity: 0; transform: scale(.5) rotate(0deg); }
+      40%      { opacity: 1; transform: scale(1.2) rotate(20deg); }
+      70%      { opacity: 0; transform: scale(.8) rotate(40deg); }
+    }
+
+    @keyframes coin-drop {
+      0%   { opacity: 0; transform: translateY(-10px) scale(.7) rotate(-25deg); }
+      15%  { opacity: 1; }
+      62%  { opacity: 1; transform: translateY(38px) scale(1) rotate(18deg); }
+      78%  { opacity: 0; transform: translateY(47px) scale(.9) rotate(28deg); }
+      100% { opacity: 0; transform: translateY(47px) scale(.9) rotate(28deg); }
+    }
+
+    @keyframes wallet-swell {
+      0%, 30%, 100% { transform: scale(1); }
+      52%           { transform: scale(1.08); }
+      70%           { transform: scale(1.02); }
+    }
+
+    @keyframes pile-in {
+      from { opacity: 0; transform: scale(.6); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes wallet-shine {
+      0%, 18%   { opacity: 0; transform: translateX(-48px); }
+      32%       { opacity: .85; }
+      60%       { opacity: .5; transform: translateX(96px); }
+      100%      { opacity: 0; transform: translateX(96px); }
+    }
+
+    @keyframes wallet-spark {
+      0%, 100% { opacity: .15; transform: scale(.65) rotate(0deg); }
+      45%      { opacity: 1; transform: scale(1.1) rotate(22deg); }
+      70%      { opacity: .35; transform: scale(.85) rotate(38deg); }
+    }
+
+    @keyframes vitality-rise {
+      0%   { opacity: 0; transform: scaleY(.25); }
+      35%  { opacity: .55; }
+      100% { opacity: 1; transform: scaleY(1); }
+    }
+
+    @keyframes ray-in {
+      from { opacity: 0; transform: scale(.2); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes sun-turn {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    @keyframes sun-glow-in {
+      from { opacity: 0; transform: scale(.78); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes sun-face-in {
+      from { opacity: 0; transform: scale(.78); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes caret-blink {
+      0%, 49%   { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+
+    @keyframes age-in {
+      0%   { opacity: 0; transform: scale(.3); }
+      55%  { opacity: 1; transform: scale(1.06); }
+      75%  { transform: scale(.985); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes halo-pulse {
+      0%, 100% { opacity: .45; transform: scale(.92); }
+      50%      { opacity: .9;  transform: scale(1.06); }
+    }
+
+    /* ---------- 11. Mouvement réduit ---------- */
+    @media (prefers-reduced-motion: reduce) {
+      .gift-shake,
+      .sparkle,
+      .pin-fields.is-error,
+      .wallet-body,
+      .wallet-fly,
+      .wallet-coin,
+      .wallet-swell,
+      .wallet-pile,
+      .wallet-shine,
+      .wallet-spark,
+      .cross-enter,
+      .cross-pulse,
+      .clover-star,
+      .vitality-aura,
+      .sun-glow,
+      .sun-rays,
+      .sun-ray,
+      .sun-face,
+      .age-number,
+      .age-halo,
+      .gold-btn::before {
+        animation: none !important;
+      }
+
+      .scene,
+      .gift-lid,
+      .gift-halo,
+      .story-card--reveal,
+      .laptop-screen,
+      .laptop-glow,
+      .clover-spin,
+      .gold-btn,
+      .story-next,
+      .anecdote-more,
+      .replay-btn {
+        transition-duration: .01ms !important;
+        transition-delay: 0ms !important;
+      }
+
+      .wallet-fly { opacity: 0 !important; }
+      .wallet-coin {
+        opacity: .9 !important;
+        transform: translateY(38px) !important;
+      }
+      .wallet-swell,
+      .wallet-spark,
+      .sun-ray,
+      .sun-face,
+      .sun-glow {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .wallet-pile { opacity: 1 !important; transform: none !important; }
+      .wallet-shine { opacity: 0 !important; }
+      .vitality-aura {
+        opacity: .7 !important;
+        transform: none !important;
+      }
+      .cross-enter,
+      .cross-pulse,
+      .clover-spin,
+      .clover-star,
+      .age-number {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .age-halo { opacity: .6 !important; transform: none !important; }
+      .story-card--reveal .laptop-screen { transform: none !important; }
+      .code-line { opacity: 1 !important; }
+      .gold-btn::before { display: none; }
+      .type-caret { animation: none !important; }
+
+      /* Rideau : simple fondu, sans glissement */
+      .curtain { opacity: 0; transition: opacity .35s ease; }
+      .curtain.is-closed { opacity: 1; }
+      .curtain-panel {
+        transform: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <div class="loader">
-        <div class="centerDiv">
-            <div class="loadImg">
+  <!-- ============================================================
+       SPRITE SVG PARTAGÉ (dessin du cadeau)
+       ============================================================ -->
+  <svg class="svg-sprite" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="gBox" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#EE7C5B"/>
+        <stop offset=".55" stop-color="#E8704F"/>
+        <stop offset="1" stop-color="#D25C3E"/>
+      </linearGradient>
 
-                <div class="svg-animated-wrapper">
-                    <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <g class="icon-paths">
-                        <path class="pb" d="M22 22L2 22" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
-                        <path d="M2 11L6.06296 7.74968M22 11L13.8741 4.49931C12.7784 3.62279 11.2216 3.62279 10.1259 4.49931L9.34398 5.12486" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
-                        <path d="M15.5 5.5V3.5C15.5 3.22386 15.7239 3 16 3H18.5C18.7761 3 19 3.22386 19 3.5V8.5" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
-                        <path d="M4 22V9.5" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
-                        <path d="M20 9.5V13.5M20 22V17.5" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
-                        <path d="M15 22V17C15 15.5858 15 14.8787 14.5607 14.4393C14.1213 14 13.4142 14 12 14C10.5858 14 9.87868 14 9.43934 14.4393M9 22V17" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M14 9.5C14 10.6046 13.1046 11.5 12 11.5C10.8954 11.5 10 10.6046 10 9.5C10 8.39543 10.8954 7.5 12 7.5C13.1046 7.5 14 8.39543 14 9.5Z" stroke="#1C274C" stroke-width="1.5"/>
-                      </g>
-                    </svg>
-                  </div>
-            </div>
-            <h1>HomeTown</h1>
+      <linearGradient id="gLid" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#F49C7E"/>
+        <stop offset="1" stop-color="#E8704F"/>
+      </linearGradient>
+
+      <linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#E8CE8B"/>
+        <stop offset=".45" stop-color="#C9A24D"/>
+        <stop offset="1" stop-color="#A9822F"/>
+      </linearGradient>
+
+      <linearGradient id="gBow" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#EBD491"/>
+        <stop offset=".55" stop-color="#C9A24D"/>
+        <stop offset="1" stop-color="#B08A3E"/>
+      </linearGradient>
+
+      <radialGradient id="gWax" cx="35%" cy="28%" r="80%">
+        <stop offset="0" stop-color="#F28A69"/>
+        <stop offset=".55" stop-color="#E8704F"/>
+        <stop offset="1" stop-color="#B8452B"/>
+      </radialGradient>
+
+      <radialGradient id="gHalo" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#F3DFA8" stop-opacity=".8"/>
+        <stop offset=".55" stop-color="#E9CE8C" stop-opacity=".32"/>
+        <stop offset="1" stop-color="#E9CE8C" stop-opacity="0"/>
+      </radialGradient>
+
+      <filter id="fSoft" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="5"/>
+      </filter>
+
+      <!-- Corps de la boîte + rubans -->
+      <g id="gift-base">
+        <ellipse cx="120" cy="125" rx="64" ry="9" fill="#6B2B1E"/>
+        <ellipse cx="120" cy="124" rx="55" ry="6" fill="#3B1A13"/>
+
+        <rect x="54" y="126" width="132" height="78" rx="6" fill="url(#gBox)"/>
+        <path d="M174 126h4a6 6 0 0 1 6 6v66a6 6 0 0 1-6 6h-4z" fill="#8C3323" opacity=".16"/>
+        <rect x="58" y="130" width="2" height="70" rx="1" fill="#FFD9C9" opacity=".28"/>
+
+        <rect x="113" y="126" width="14" height="78" fill="url(#gGold)"/>
+        <rect x="54" y="155" width="132" height="14" fill="url(#gGold)"/>
+        <rect x="119.5" y="126" width="2" height="78" fill="#FFF1C9" opacity=".25"/>
+        <rect x="54" y="161.5" width="132" height="2" fill="#8A6A3B" opacity=".18"/>
+
+        <rect x="54" y="126" width="132" height="78" rx="6" fill="none" stroke="#B8452B" stroke-opacity=".28"/>
+      </g>
+
+      <!-- Couvercle + nœud (groupe animable) -->
+      <g id="gift-lid-art">
+        <rect x="46" y="104" width="148" height="24" rx="4" fill="url(#gLid)"/>
+        <rect x="46" y="104" width="148" height="7" rx="3.5" fill="#FFD3C0" opacity=".4"/>
+        <rect x="46" y="126" width="148" height="2" fill="#8C3323" opacity=".22"/>
+        <rect x="113" y="104" width="14" height="24" fill="url(#gGold)"/>
+        <rect x="119.5" y="104" width="2" height="24" fill="#FFF1C9" opacity=".25"/>
+        <rect x="46" y="104" width="148" height="24" rx="4" fill="none" stroke="#B8452B" stroke-opacity=".22"/>
+
+        <path d="M120 94C104 74 82 79 87 93c4 11 20 10 33 4z" fill="url(#gBow)"/>
+        <path d="M120 94C136 74 158 79 153 93c-4 11-20 10-33 4z" fill="url(#gBow)"/>
+        <path d="M120 94C104 74 82 79 87 93" fill="none" stroke="#A9822F" stroke-opacity=".45"/>
+        <path d="M120 94C136 74 158 79 153 93" fill="none" stroke="#A9822F" stroke-opacity=".45"/>
+
+        <path d="M116 98c-4 8-10 12-19 16 10-1 17-4 23-11z" fill="url(#gGold)"/>
+        <path d="M124 98c4 8 10 12 19 16-10-1-17-4-23-11z" fill="url(#gGold)"/>
+
+        <circle cx="120" cy="95" r="7.5" fill="#D9B25E" stroke="#A9822F" stroke-opacity=".55"/>
+        <circle cx="117.8" cy="92.6" r="2" fill="#FFF1C9" opacity=".9"/>
+      </g>
+
+      <!-- Étoile à quatre branches -->
+      <path id="star-shape" d="M0-7C.8-2 2-.8 7 0 2 .8.8 2 0 7-.8 2-2 .8-7 0-2-.8-.8-2 0-7Z"/>
+    </defs>
+  </svg>
+
+  <div class="frame" aria-hidden="true"></div>
+
+  <main id="app">
+    <!-- ============================================================
+         SCÈNE 1 — ACCUEIL
+         ============================================================ -->
+    <section id="scene-gift" class="scene is-active" aria-label="Accueil">
+      <div class="scene-inner">
+        <p class="eyebrow">Une carte d'anniversaire pour</p>
+        <h1 class="display mt-3"><span data-bind="name">Tonton Rado</span></h1>
+        <p class="serif-italic mt-2">avec tendresse, <span data-bind="sender">Antsa</span></p>
+
+        <div class="ornament mt-6" aria-hidden="true"><span>✦</span></div>
+
+        <button id="gift-trigger" type="button" class="gift-button mt-5" aria-label="Ouvrir le cadeau">
+          <span class="gift-shake">
+            <svg class="gift-svg" viewBox="0 0 240 240" aria-hidden="true">
+              <ellipse cx="120" cy="211" rx="80" ry="11" fill="#B8452B" opacity=".16" filter="url(#fSoft)"/>
+              <use href="#gift-base"/>
+              <g class="gift-lid"><use href="#gift-lid-art"/></g>
+
+              <!-- Sceau de cire : initiale de l'expéditeur (injectée en JS) -->
+              <g transform="translate(120 183)">
+                <circle cy="2" r="17" fill="#3B1A13" opacity=".18"/>
+                <circle r="17" fill="url(#gWax)"/>
+                <circle r="13.2" fill="none" stroke="#F3DFA8" stroke-opacity=".5" stroke-width=".8" stroke-dasharray="1.5 2.6"/>
+                <text class="seal-initial" text-anchor="middle" y="6" font-size="18" fill="#FAF4E6">A</text>
+              </g>
+
+              <!-- Éclats dorés -->
+              <g aria-hidden="true">
+                <g transform="translate(42 88) scale(.9)"><use href="#star-shape" class="sparkle" fill="#C9A24D"/></g>
+                <g transform="translate(198 72) scale(.7)"><use href="#star-shape" class="sparkle sparkle--b" fill="#C9A24D"/></g>
+                <g transform="translate(190 132) scale(.55)"><use href="#star-shape" class="sparkle sparkle--c" fill="#C9A24D"/></g>
+                <g transform="translate(50 60) scale(.45)"><use href="#star-shape" class="sparkle sparkle--b" fill="#C9A24D"/></g>
+              </g>
+            </svg>
+          </span>
+          <span class="tap-hint">Appuie pour ouvrir</span>
+        </button>
+
+        <!-- Compte à rebours jusqu'à minuit (Europe/Paris) -->
+        <div class="mt-6 flex flex-col items-center gap-1.5">
+          <span class="eyebrow" style="font-size:.56rem;">Avant minuit</span>
+          <span id="countdown" class="countdown" aria-live="off">--:--:--</span>
         </div>
-    </div>
-    
-    <!-- Everything -->
-    <div class="everything">
-        <header class="flex">
-            <!-- Logo -->
-            <div class="nom centerDiv">
-                <img src="./images/accueil.png" alt="Home" srcset="" width="30" height="30">
-                 <p id="titre">HomeMaker</p>
-             </div>
-     
-             <!-- Menu -->
-             <div class="menu flex">
-                 <div>
-                     <img src="" alt="">
-                         <p>home</p>
-                     </img>
-                 </div>
-                 <div>
-                     <img src="" alt="">
-                         <p>home</p>
-                     </img>
-                 </div>
-                 <div>
-                     <img src="" alt="">
-                         <p>home</p>
-                     </img>
-                 </div>
-             </div>
-         </header>
+      </div>
+    </section>
 
+    <!-- ============================================================
+         SCÈNE 2 — CODE PIN
+         ============================================================ -->
+    <section id="scene-pin" class="scene" inert aria-hidden="true" aria-label="Code secret">
+      <div class="scene-inner">
+        <div class="paper w-full max-w-[23rem] px-6 py-9 sm:px-8">
 
-         <div class="contentAll">
-     
-     
-             <div class="pub">
-                 <h1>Vente de maisons</h1>
-         
-                 <div class="slogan">
-                     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit dicta, quasi doloremque harum quia nobis? Repudiandae, rem eligendi suscipit quaerat, tempore pariatur magnam sint repellat vel, alias accusamus animi ut?</p>
-                 </div>
-     
-                 <div class="pub1">
-                     <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Doloribus, quidem aspernatur? Nisi corrupti ullam quo, asperiores repellat repellendus expedita commodi blanditiis neque aliquid sit eos perspiciatis iste cumque hic? Iusto?</p>
-                 </div>
-             </div>
-     
-     
-             <!-- Liste des maisons -->
-             <div class="caroussel flex">
-                 <!-- Maison 1 -->
-                 <div class="container">
-                     <div class="content">
-                         <img src="" alt="Maison" srcset="">
-                     </div>
-                     <div class="content">
-                         <div>
-                             <h2>Description</h2>
-                             <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Placeat perspiciatis sit nulla alias quae nam sint commodi ea quidem! Eius officia iusto hic atque expedita reprehenderit numquam voluptatum officiis nihil.</p>
-                         </div>
-                         <button>Acheter</button>
-                     </div>
-                 </div>
-     
-                 <!-- Maison 2 -->
-                 <div class="container">
-                     <div class="content">
-                         <img src="" alt="Maison" srcset="">
-                     </div>
-                     <div class="content">
-                         <div>
-                             <h2>Description</h2>
-                             <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Placeat perspiciatis sit nulla alias quae nam sint commodi ea quidem! Eius officia iusto hic atque expedita reprehenderit numquam voluptatum officiis nihil.</p>
-                         </div>
-                         <button>Acheter</button>
-                     </div>
-                 </div>
-     
-                 <!-- Maison 3 -->
-                 <div class="container">
-                     <div class="content">
-                         <img src="" alt="Maison" srcset="">
-                     </div>
-                     <div class="content">
-                         <div>
-                             <h2>Description</h2>
-                             <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Placeat perspiciatis sit nulla alias quae nam sint commodi ea quidem! Eius officia iusto hic atque expedita reprehenderit numquam voluptatum officiis nihil.</p>
-                         </div>
-                         <button>Acheter</button>
-                     </div>
-                 </div>
-     
-     
-             </div>
-     
-             <!-- Feedback -->
-             <div class="feedback centerDiv">
-                 <div>
-                     <div class="textFeedback">
-                         <p>trusted by<span>1200+</span></p>
-                     </div>
-                 </div>
-                 <div>
-                     <div class="textFeedback">
-                         <p>trusted by<span>1200+</span></p>
-                     </div>
-                 </div>
-                 <div>
-                     <div class="textFeedback">
-                         <p>trusted by<span>1200+</span></p>
-                     </div>
-                 </div>
-             </div>
-     
-             <!-- Contact -->
-              <div class="contact centerDiv">
-                 <!-- Left -->
-                 <div>
-                     <div>
-                         <img src="" alt="Telephone" class="contactImg">
-                         <p class="contactLabel">Telephone</p>
-                     </div>
-                     <div>
-                         <img src="" alt="Email" class="contactImg">
-                         <p class="contactLabel">Telephone</p>
-                     </div>
-                     <div>
-                         <img src="" alt="Adresse" class="contactImg">
-                         <p class="contactLabel">Telephone</p>
-                     </div>
-                 </div>
-     
-                 <!-- Preview -->
-                 <div>
-                     <!-- Phone -->
-                     <div>
-                         <div>
-                             <img src="" alt="maison">
-                             <p class="Ctitle">titre</p>
-                             <p class="descri">lorem ipsum dolor</p>
-                         </div>
-                         <div><button>Contacter</button></div>
-                     </div>
-     
-                     <!-- Email -->
-                     <div>
-                         <div>
-                             <img src="" alt="maison">
-                             <p class="Ctitle">titre</p>
-                             <p class="descri">lorem ipsum dolor</p>
-                         </div>
-                         <div><button>Contacter</button></div>
-                     </div>
-     
-                     <!-- Adresse -->
-                     <div>
-                         <div>
-                             <img src="" alt="maison">
-                             <p class="Ctitle">titre</p>
-                             <p class="descri">lorem ipsum dolor</p>
-                         </div>
-                         <div><button>Contacter</button></div>
-                     </div>
-                 </div>
-              </div>
-         </div>
-     </div>
-    <script src="./index.js"></script>
+          <div class="ornament" aria-hidden="true"><span>✦</span></div>
+          <p class="eyebrow mt-4">Dernière étape</p>
+          <h2 class="serif-title mt-2">Un dernier secret…</h2>
+          <p class="hint mt-3">
+            Date d'anniversaire
+            <small>(Jour / Mois, ex : 1205 pour le 12 mai)</small>
+          </p>
+
+          <div class="mt-6">
+            <div id="pin-fields" class="pin-fields" role="group" aria-label="Code à quatre chiffres">
+              <input class="pin-field" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*"
+                     autocomplete="off" aria-label="Chiffre 1">
+              <input class="pin-field" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*"
+                     autocomplete="off" aria-label="Chiffre 2">
+              <input class="pin-field" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*"
+                     autocomplete="off" aria-label="Chiffre 3">
+              <input class="pin-field" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*"
+                     autocomplete="off" aria-label="Chiffre 4">
+            </div>
+
+            <p id="pin-status" class="pin-status" role="status" aria-live="polite"></p>
+
+            <button id="pin-submit" type="button" class="btn-primary mt-1">Ouvrir</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SCÈNE 3 — OUVERTURE DU CADEAU
+         ============================================================ -->
+    <section id="scene-final" class="scene" inert aria-hidden="true" aria-label="Ouverture du cadeau">
+      <div class="scene-inner">
+        <!-- Grand cadeau dont le couvercle s'ouvre -->
+        <div class="final-gift">
+          <svg class="gift-svg gift-svg--final" viewBox="0 0 240 240" aria-hidden="true">
+            <circle class="gift-halo" cx="120" cy="150" r="104" fill="url(#gHalo)"/>
+            <ellipse cx="120" cy="211" rx="80" ry="11" fill="#B8452B" opacity=".16" filter="url(#fSoft)"/>
+            <use href="#gift-base"/>
+            <g class="gift-lid"><use href="#gift-lid-art"/></g>
+
+            <g transform="translate(120 183)">
+              <circle cy="2" r="17" fill="#3B1A13" opacity=".18"/>
+              <circle r="17" fill="url(#gWax)"/>
+              <circle r="13.2" fill="none" stroke="#F3DFA8" stroke-opacity=".5" stroke-width=".8" stroke-dasharray="1.5 2.6"/>
+              <text class="seal-initial" text-anchor="middle" y="6" font-size="18" fill="#FAF4E6">A</text>
+            </g>
+
+            <g aria-hidden="true">
+              <g transform="translate(42 88) scale(.9)"><use href="#star-shape" class="sparkle" fill="#C9A24D"/></g>
+              <g transform="translate(198 72) scale(.7)"><use href="#star-shape" class="sparkle sparkle--b" fill="#C9A24D"/></g>
+              <g transform="translate(190 132) scale(.55)"><use href="#star-shape" class="sparkle sparkle--c" fill="#C9A24D"/></g>
+              <g transform="translate(50 60) scale(.45)"><use href="#star-shape" class="sparkle sparkle--b" fill="#C9A24D"/></g>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SCÈNE 1 — BUDGET LIMITÉ
+         ============================================================ -->
+    <section id="scene-story-1" class="scene story-scene" inert aria-hidden="true" aria-label="Budget limité">
+      <div class="story-stage">
+        <div class="story-card paper">
+          <div class="story-visual">
+            <svg viewBox="0 0 120 120" class="story-svg wallet-svg" aria-hidden="true">
+              <g class="wallet-body">
+                <path d="M25 45h70c5 0 9 4 9 9v30c0 5-4 9-9 9H25c-5 0-9-4-9-9V54c0-5 4-9 9-9Z"
+                      fill="#EFE3C8" stroke="#C9A24D" stroke-width="2"/>
+                <path d="M16 62h88v22H16z" fill="#E8704F" opacity=".9"/>
+                <path d="M16 62h88v6H16z" fill="#C9A24D" opacity=".55"/>
+                <path d="M25 45 42 22h53L80 45" fill="#FAF4E6" stroke="#C9A24D"
+                      stroke-width="2" stroke-linejoin="round"/>
+                <path d="M42 22h53" stroke="#C9A24D" stroke-width="2"/>
+                <path d="M25 72h26M25 80h15" stroke="#FFF8F0" stroke-width="2"
+                      stroke-linecap="round" opacity=".85"/>
+                <circle cx="90" cy="76" r="3" fill="#C9A24D" opacity=".65"/>
+                <path d="M12 54v30" stroke="#B8452B" stroke-width="2" opacity=".35"/>
+              </g>
+              <g transform="translate(80 48)">
+                <path d="M2 2c9 8 3 21 8 32" fill="none" stroke="#C9A24D"
+                      stroke-width="1" stroke-dasharray="1.5 3" opacity=".45"/>
+                <g class="wallet-fly">
+                  <ellipse cx="0" cy="0" rx="4.6" ry="3.1" fill="#2A2623"/>
+                  <ellipse cx="-5" cy="-3.2" rx="6.2" ry="2.8" transform="rotate(-28 -5 -3.2)"
+                           fill="#F3DFA8" opacity=".92"/>
+                  <ellipse cx="5" cy="-3.2" rx="6.2" ry="2.8" transform="rotate(28 5 -3.2)"
+                           fill="#F3DFA8" opacity=".92"/>
+                  <path d="M-2 -3 1 -7M2 -3 5 -7" stroke="#2A2623" stroke-width=".7" stroke-linecap="round"/>
+                </g>
+              </g>
+            </svg>
+          </div>
+          <p class="story-copy" id="story-1-top">Désolé, j'ai les moyens un peu limités</p>
+        </div>
+
+        <div class="story-card story-card--reveal paper">
+          <p class="story-copy" id="story-1-bottom">Par contre, j'ai des connaissances</p>
+          <div class="story-visual">
+            <svg viewBox="0 0 120 120" class="story-svg laptop-svg" aria-hidden="true">
+              <defs>
+                <radialGradient id="laptopGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0" stop-color="#F3DFA8" stop-opacity=".75"/>
+                  <stop offset="1" stop-color="#F3DFA8" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <ellipse class="laptop-glow" cx="60" cy="54" rx="40" ry="26" fill="url(#laptopGlow)"/>
+              <g class="laptop-screen">
+                <rect x="22" y="20" width="76" height="52" rx="4" fill="#2A2623"
+                      stroke="#C9A24D" stroke-width="2"/>
+                <rect x="27" y="25" width="66" height="42" rx="2" fill="#FAF4E6"/>
+                <circle cx="33" cy="31" r="1.6" fill="#3F8F5A"/>
+                <circle cx="38" cy="31" r="1.6" fill="#E8704F"/>
+                <circle cx="43" cy="31" r="1.6" fill="#C9A24D"/>
+                <rect class="code-line" style="--i:0" x="32" y="38" width="34" height="2.5" fill="#E8704F"/>
+                <rect class="code-line" style="--i:1" x="32" y="45" width="48" height="2.5" fill="#C9A24D"/>
+                <rect class="code-line" style="--i:2" x="40" y="52" width="30" height="2.5" fill="#8A6A3B"/>
+                <rect class="code-line" style="--i:3" x="40" y="59" width="22" height="2.5" fill="#3F8F5A"/>
+              </g>
+              <path d="M20 76h80l9 13H11z" fill="#EFE3C8" stroke="#C9A24D"
+                    stroke-width="2" stroke-linejoin="round"/>
+              <path d="M30 80h60" stroke="#D9C6A0" stroke-width="1.5" stroke-linecap="round"/>
+              <rect x="53" y="82" width="14" height="4" rx="2" fill="#C9A24D" opacity=".7"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="story-footer">
+        <button type="button" class="gold-btn story-next" aria-hidden="true" tabindex="-1">
+          <span class="js-next-label">Suivant ✦</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SCÈNE 2 — VŒUX
+         ============================================================ -->
+    <section id="scene-story-2" class="scene story-scene" inert aria-hidden="true" aria-label="Vœux">
+      <div class="story-stage">
+        <div class="story-card paper">
+          <div class="story-visual">
+            <svg viewBox="0 0 120 120" class="story-svg crosses-svg" aria-hidden="true">
+              <defs>
+                <radialGradient id="crossGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0" stop-color="#9BDEB0" stop-opacity=".18"/>
+                  <stop offset="1" stop-color="#9BDEB0" stop-opacity="0"/>
+                </radialGradient>
+                <linearGradient id="healthAura" x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0" stop-color="#F3DFA8" stop-opacity="0"/>
+                  <stop offset=".55" stop-color="#E6C77A" stop-opacity=".22"/>
+                  <stop offset="1" stop-color="#F3DFA8" stop-opacity=".72"/>
+                </linearGradient>
+              </defs>
+              <ellipse class="vitality-aura" cx="60" cy="58" rx="43" ry="31" fill="url(#healthAura)"/>
+              <ellipse cx="60" cy="58" rx="48" ry="34" fill="url(#crossGlow)"/>
+              <g transform="translate(33 54) scale(.85)">
+                <g class="cross-enter" style="--d:.15s;"><g class="cross-pulse" style="--pd:1.35s;">
+                  <g fill="#C9A24D" opacity=".8">
+                    <rect x="-6.5" y="-16.5" width="13" height="33" rx="4"/>
+                    <rect x="-16.5" y="-6.5" width="33" height="13" rx="4"/>
+                  </g>
+                  <g fill="#8FD4A4">
+                    <rect x="-4.5" y="-14.5" width="9" height="29" rx="3"/>
+                    <rect x="-14.5" y="-4.5" width="29" height="9" rx="3"/>
+                  </g>
+                </g></g>
+              </g>
+              <g transform="translate(62 40) scale(1.12)">
+                <g class="cross-enter" style="--d:.5s;"><g class="cross-pulse" style="--pd:1.7s;">
+                  <g fill="#C9A24D" opacity=".8">
+                    <rect x="-6.5" y="-16.5" width="13" height="33" rx="4"/>
+                    <rect x="-16.5" y="-6.5" width="33" height="13" rx="4"/>
+                  </g>
+                  <g fill="#8FD4A4">
+                    <rect x="-4.5" y="-14.5" width="9" height="29" rx="3"/>
+                    <rect x="-14.5" y="-4.5" width="29" height="9" rx="3"/>
+                  </g>
+                </g></g>
+              </g>
+              <g transform="translate(88 62) scale(.68)">
+                <g class="cross-enter" style="--d:.85s;"><g class="cross-pulse" style="--pd:2.05s;">
+                  <g fill="#C9A24D" opacity=".8">
+                    <rect x="-6.5" y="-16.5" width="13" height="33" rx="4"/>
+                    <rect x="-16.5" y="-6.5" width="33" height="13" rx="4"/>
+                  </g>
+                  <g fill="#8FD4A4">
+                    <rect x="-4.5" y="-14.5" width="9" height="29" rx="3"/>
+                    <rect x="-14.5" y="-4.5" width="29" height="9" rx="3"/>
+                  </g>
+                </g></g>
+              </g>
+            </svg>
+          </div>
+          <p class="story-copy story-copy--wish" id="story-2-top">Mirary fahasalamana</p>
+        </div>
+
+        <div class="story-card story-card--reveal paper">
+          <p class="story-copy story-copy--wish" id="story-2-bottom">Mirary fahombiazana sy vintana ihany koa</p>
+          <div class="story-visual">
+            <svg viewBox="0 0 120 120" class="story-svg clover-svg" aria-hidden="true">
+              <defs>
+                <radialGradient id="cloverGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0" stop-color="#C9A24D" stop-opacity=".3"/>
+                  <stop offset="1" stop-color="#C9A24D" stop-opacity="0"/>
+                </radialGradient>
+                <linearGradient id="luckAura" x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0" stop-color="#F3DFA8" stop-opacity="0"/>
+                  <stop offset=".55" stop-color="#E6C77A" stop-opacity=".25"/>
+                  <stop offset="1" stop-color="#F3DFA8" stop-opacity=".78"/>
+                </linearGradient>
+                <path id="clover-leaf-shape"
+                      d="M60 58C50 52 42 42 48 33c5-7 11-2 12 7 1-9 7-14 12-7 6 9-2 19-12 25Z"/>
+              </defs>
+              <ellipse class="vitality-aura" cx="60" cy="58" rx="45" ry="37" fill="url(#luckAura)"/>
+              <ellipse class="clover-glow" cx="60" cy="58" rx="46" ry="38" fill="url(#cloverGlow)"/>
+              <g class="clover-spin">
+                <g fill="#8FD4A4" stroke="#C9A24D" stroke-width="1.5" stroke-linejoin="round">
+                  <use href="#clover-leaf-shape"/>
+                  <use href="#clover-leaf-shape" transform="rotate(90 60 58)"/>
+                  <use href="#clover-leaf-shape" transform="rotate(180 60 58)"/>
+                  <use href="#clover-leaf-shape" transform="rotate(270 60 58)"/>
+                </g>
+                <circle cx="60" cy="58" r="4.5" fill="#C9A24D"/>
+                <path d="M60 62c-2 8 1 16 7 21" fill="none" stroke="#8FD4A4"
+                      stroke-width="3" stroke-linecap="round"/>
+                <g fill="#C9A24D">
+                  <g transform="translate(30 28) scale(.8)"><use href="#star-shape" class="clover-star"/></g>
+                  <g transform="translate(92 38) scale(.6)"><use href="#star-shape" class="clover-star clover-star--b"/></g>
+                  <g transform="translate(84 88) scale(.7)"><use href="#star-shape" class="clover-star clover-star--c"/></g>
+                  <g transform="translate(28 74) scale(.5)"><use href="#star-shape" class="clover-star clover-star--b"/></g>
+                </g>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="story-footer">
+        <button type="button" class="gold-btn story-next" aria-hidden="true" tabindex="-1">
+          <span class="js-next-label">Suivant ✦</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SCÈNE 3 — VŒUX 2
+         ============================================================ -->
+    <section id="scene-story-3" class="scene story-scene" inert aria-hidden="true" aria-label="Vœux 2">
+      <div class="story-stage">
+        <div class="story-card paper">
+          <div class="story-visual">
+            <svg viewBox="0 0 120 120" class="story-svg wallet-svg wallet-fill-svg" aria-hidden="true">
+              <defs>
+                <radialGradient id="walletCoinGold" cx="35%" cy="30%" r="70%">
+                  <stop offset="0" stop-color="#FFF3C4"/>
+                  <stop offset=".55" stop-color="#E6C77A"/>
+                  <stop offset="1" stop-color="#B88932"/>
+                </radialGradient>
+                <linearGradient id="walletFillShine" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0" stop-color="#FFF8F0" stop-opacity="0"/>
+                  <stop offset=".5" stop-color="#FFF8F0" stop-opacity=".9"/>
+                  <stop offset="1" stop-color="#F3DFA8" stop-opacity="0"/>
+                </linearGradient>
+                <clipPath id="walletFillClip">
+                  <path d="M25 45h70c5 0 9 4 9 9v30c0 5-4 9-9 9H25c-5 0-9-4-9-9V54c0-5 4-9 9-9Z"/>
+                </clipPath>
+              </defs>
+
+              <g class="wallet-swell">
+                <path d="M25 45h70c5 0 9 4 9 9v30c0 5-4 9-9 9H25c-5 0-9-4-9-9V54c0-5 4-9 9-9Z"
+                      fill="#EFE3C8" stroke="#C9A24D" stroke-width="2"/>
+                <path d="M16 62h88v22H16z" fill="#E8704F" opacity=".9"/>
+                <path d="M16 62h88v6H16z" fill="#C9A24D" opacity=".55"/>
+
+                <g class="wallet-pile">
+                  <ellipse cx="52" cy="76" rx="8" ry="3.2" fill="#E6C77A" stroke="#A8802F" stroke-width=".7"/>
+                  <ellipse cx="62" cy="77" rx="8" ry="3.2" fill="#F3DFA8" stroke="#A8802F" stroke-width=".7"/>
+                  <ellipse cx="72" cy="76" rx="8" ry="3.2" fill="#E6C77A" stroke="#A8802F" stroke-width=".7"/>
+                </g>
+
+                <g clip-path="url(#walletFillClip)">
+                  <rect class="wallet-shine" x="10" y="38" width="18" height="64"
+                        fill="url(#walletFillShine)" transform="rotate(16 19 70)"/>
+                </g>
+
+                <path d="M25 45 42 22h53L80 45" fill="#FAF4E6" stroke="#C9A24D"
+                      stroke-width="2" stroke-linejoin="round"/>
+                <path d="M42 22h53" stroke="#C9A24D" stroke-width="2"/>
+                <path d="M25 72h26M25 80h15" stroke="#FFF8F0" stroke-width="2"
+                      stroke-linecap="round" opacity=".85"/>
+                <circle cx="90" cy="76" r="3" fill="#C9A24D" opacity=".65"/>
+                <path d="M12 54v30" stroke="#B8452B" stroke-width="2" opacity=".35"/>
+              </g>
+
+              <!-- Pièces qui tombent une à une dans le portefeuille -->
+              <g class="wallet-coins">
+                <g transform="translate(38 8)"><g class="wallet-coin" style="--cd:.15s;">
+                  <circle r="5.4" fill="url(#walletCoinGold)" stroke="#A8802F" stroke-width=".8"/>
+                  <circle r="3.3" fill="none" stroke="#FFF3C4" stroke-width=".8" opacity=".8"/>
+                </g></g>
+                <g transform="translate(54 4)"><g class="wallet-coin" style="--cd:.5s;">
+                  <circle r="5.4" fill="url(#walletCoinGold)" stroke="#A8802F" stroke-width=".8"/>
+                  <circle r="3.3" fill="none" stroke="#FFF3C4" stroke-width=".8" opacity=".8"/>
+                </g></g>
+                <g transform="translate(70 10)"><g class="wallet-coin" style="--cd:.85s;">
+                  <circle r="5.4" fill="url(#walletCoinGold)" stroke="#A8802F" stroke-width=".8"/>
+                  <circle r="3.3" fill="none" stroke="#FFF3C4" stroke-width=".8" opacity=".8"/>
+                </g></g>
+                <g transform="translate(46 2)"><g class="wallet-coin" style="--cd:1.2s;">
+                  <circle r="5.4" fill="url(#walletCoinGold)" stroke="#A8802F" stroke-width=".8"/>
+                  <circle r="3.3" fill="none" stroke="#FFF3C4" stroke-width=".8" opacity=".8"/>
+                </g></g>
+                <g transform="translate(78 5)"><g class="wallet-coin" style="--cd:1.55s;">
+                  <circle r="5.4" fill="url(#walletCoinGold)" stroke="#A8802F" stroke-width=".8"/>
+                  <circle r="3.3" fill="none" stroke="#FFF3C4" stroke-width=".8" opacity=".8"/>
+                </g></g>
+              </g>
+
+              <g transform="translate(100 38)">
+                <g class="wallet-spark" fill="#E6C77A">
+                  <path d="M0-7 1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z"/>
+                </g>
+              </g>
+            </svg>
+          </div>
+          <div class="story-copy-block">
+            <p class="story-copy story-copy--wish" id="story-3-top">Mirary harena be</p>
+            <p class="story-translation" id="story-3-top-translation">Je te souhaite de la prospérité</p>
+          </div>
+        </div>
+
+        <div class="story-card story-card--reveal paper">
+          <div class="story-copy-block">
+            <p class="story-copy story-copy--wish" id="story-3-bottom">Mirary fahasambarana sy fifaliana</p>
+            <p class="story-translation" id="story-3-bottom-translation">Je te souhaite du bonheur et de la joie</p>
+          </div>
+          <div class="story-visual">
+            <svg viewBox="0 0 120 120" class="story-svg sun-svg" aria-hidden="true">
+              <defs>
+                <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0" stop-color="#F3DFA8" stop-opacity=".65"/>
+                  <stop offset="1" stop-color="#F3DFA8" stop-opacity="0"/>
+                </radialGradient>
+                <linearGradient id="sunRays" gradientUnits="userSpaceOnUse" x1="60" y1="108" x2="60" y2="12">
+                  <stop offset="0" stop-color="#C9A24D"/>
+                  <stop offset="1" stop-color="#F0D68C"/>
+                </linearGradient>
+              </defs>
+              <ellipse class="sun-glow" cx="60" cy="60" rx="52" ry="48" fill="url(#sunGlow)"/>
+
+              <g class="sun-rays">
+                <g transform="rotate(0 60 60)"><g class="sun-ray" style="--rd:0s;"><path d="M60 12v10" stroke="url(#sunRays)" stroke-width="3" stroke-linecap="round" fill="none"/></g></g>
+                <g transform="rotate(30 60 60)"><g class="sun-ray" style="--rd:.08s;"><path d="M60 12v10" stroke="url(#sunRays)" stroke-width="3" stroke-linecap="round" fill="none"/></g></g>
+                <g transform="rotate(60 60 60)"><g class="sun-ray" style="--rd:.16s;"><path d="M60 12v10" stroke="url(#sunRays)" stroke-width="3" stroke-linecap="round" fill="none"/></g></g>
+                <g transform="rotate(90 60 60)"><g class="sun-ray" style="--rd:.24s;"><path d="M60 12v10" stroke="url(#sunRays)" stroke-width="3" stroke-linecap="round" fill="none"/></g></g>
+                <g transform="rotate(120 60 60)"><g class="sun-ray" style="--rd:.32s;"><path d="M60 12v10" stroke="url(#sunRays)" stroke-width="3" stroke-linecap="round" fill="none"/></g></g>
+                <g transform="rotate(150 60 60)"><g class="sun-ray" style="--rd:.4s;"><path d="M60 12v10" stroke="url(#sunRays)" stroke-width="3" stroke-linecap="round" fill="none"/></g></g>
+                <g transform="rotate(180 60 60)"><g class="sun-ray" style="--rd:.48s;"><path d="M60 12v10" stroke="url(#sunRays)" stroke-width="3" stroke-linecap="round" fill="none"/></g></g>
+                <g transform="rotate(210 60 60)"><g class="sun-ray" style="--rd:.56s;"><path d="M60 12v10" stroke="url(#sunRays)" stroke-width="3" stroke-linecap="round" fill="none"/></g></g>
+                <g transform="rotate(240 60 60)"><g class="sun-ray" style="--rd:.64s;"><path d="M60 12v10" stroke="url(#sunRays)" stroke-width="3" stroke-linecap="round" fill="none"/></g></g>
+                <g transform="rotate(270 60 60)"><g class="sun-ray" style="--rd:.72s;"><path d="M60 12v10" stroke="url(#sunRays)" stroke-width="3" stroke-linecap="round" fill="none"/></g></g>
+                <g transform="rotate(300 60 60)"><g class="sun-ray" style="--rd:.8s;"><path d="M60 12v10" stroke="url(#sunRays)" stroke-width="3" stroke-linecap="round" fill="none"/></g></g>
+                <g transform="rotate(330 60 60)"><g class="sun-ray" style="--rd:.88s;"><path d="M60 12v10" stroke="url(#sunRays)" stroke-width="3" stroke-linecap="round" fill="none"/></g></g>
+              </g>
+
+              <g class="sun-face">
+                <circle cx="60" cy="60" r="24" fill="#F6E2A8" stroke="#C9A24D" stroke-width="2"/>
+                <circle cx="52" cy="56" r="2.2" fill="#8A6A3B"/>
+                <circle cx="68" cy="56" r="2.2" fill="#8A6A3B"/>
+                <path d="M51 65c4 5 14 5 18 0" fill="none" stroke="#8A6A3B"
+                      stroke-width="2.2" stroke-linecap="round"/>
+                <circle cx="46" cy="64" r="2.6" fill="#E8704F" opacity=".28"/>
+                <circle cx="74" cy="64" r="2.6" fill="#E8704F" opacity=".28"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="story-footer">
+        <button type="button" class="gold-btn story-next" aria-hidden="true" tabindex="-1">
+          <span class="js-next-label">Suivant ✦</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SCÈNE 4 — ANECDOTE
+         ============================================================ -->
+    <section id="scene-story-4" class="scene story-scene" inert aria-hidden="true" aria-label="Anecdote">
+      <div class="story-stage story-stage--narrow">
+        <article class="paper anecdote-card">
+          <div class="ornament" aria-hidden="true"><span>✦</span></div>
+          <p class="eyebrow anecdote-eyebrow" id="anecdote-title">Anecdote</p>
+          <div class="gold-rule" aria-hidden="true"></div>
+
+          <p class="anecdote-line is-typing">
+            <span class="type-target" id="anecdote-part1"></span><span class="type-caret" aria-hidden="true"></span>
+          </p>
+          <p class="anecdote-line anecdote-line--second is-hidden">
+            <span class="type-target" id="anecdote-part2"></span><span class="type-caret" aria-hidden="true"></span>
+          </p>
+
+          <button type="button" class="gold-btn gold-btn--small anecdote-more"
+                  aria-hidden="true" tabindex="-1">
+            <span class="js-suite-label">Suite</span>
+          </button>
+        </article>
+      </div>
+
+      <div class="story-footer">
+        <button type="button" class="gold-btn story-next" aria-hidden="true" tabindex="-1">
+          <span class="js-next-label">Suivant ✦</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SCÈNE 5 — FINAL
+         ============================================================ -->
+    <section id="scene-story-5" class="scene story-scene final-story" inert aria-hidden="true" aria-label="Joyeux anniversaire">
+      <div class="story-stage final-stage">
+        <p class="eyebrow eyebrow--gold" id="final-joyeux">Joyeux</p>
+
+        <div class="age-wrap">
+          <span class="age-halo" aria-hidden="true"></span>
+          <span id="age-number" class="age-number">0</span>
+        </div>
+
+        <p class="age-suffix" id="final-age-suffix">ème anniversaire</p>
+
+        <div class="ornament final-ornament" aria-hidden="true"><span>✦</span></div>
+        <p class="eyebrow final-name"><span data-bind="name">Tonton Rado</span></p>
+        <p class="serif-italic final-signature">
+          <span id="final-tenderness">avec tendresse,</span>
+          <span data-bind="sender">Antsa</span>
+        </p>
+      </div>
+
+      <div class="story-footer">
+        <button type="button" id="replay-btn" class="replay-btn" aria-hidden="true" tabindex="-1">
+          ↻ <span class="js-replay-label">Revoir</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Contrôle musique global, accessible au-dessus du rideau -->
+  <div id="music-controls" class="music-controls is-hidden">
+    <button id="music-toggle" type="button" class="icon-btn is-muted"
+            aria-label="Activer la musique" aria-pressed="false">
+      <svg class="icon icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 17V6l10-2v11"/>
+        <circle cx="6.5" cy="17.5" r="2.5"/>
+        <circle cx="16.5" cy="15.5" r="2.5"/>
+      </svg>
+      <svg class="icon icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 17V6l10-2v11"/>
+        <circle cx="6.5" cy="17.5" r="2.5"/>
+        <circle cx="16.5" cy="15.5" r="2.5"/>
+        <path d="M3 3l18 18"/>
+      </svg>
+    </button>
+    <button id="music-fallback" type="button" class="music-fallback is-hidden">♪ Lancer la musique</button>
+  </div>
+
+  <!-- Rideau réutilisable -->
+  <div id="curtain" class="curtain" aria-hidden="true" inert>
+    <div class="curtain-panel curtain-panel--left"></div>
+    <div class="curtain-panel curtain-panel--right"></div>
+  </div>
+
+  <!-- Musique de fond -->
+  <audio id="bg-music" src="assets/music.mp3" preload="auto" loop></audio>
+
+  <!-- ============================================================
+       DÉPENDANCE : CONFETTIS
+       ============================================================ -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <script>
+    "use strict";
+
+    /* ============================================================
+       1. CONFIGURATION — à modifier en un seul endroit
+       ============================================================ */
+    const CONFIG = {
+      name: "Tonton Rado",          // Prénom affiché
+      sender: "Antsa",              // Expéditeur / initiale du sceau
+      birthday: "0211",             // Date au format JJMM (02/11)
+      timezone: "Europe/Paris",     // Fuseau du compte à rebours
+      audioSrc: "assets/music.mp3", // Musique de fond
+      confettiSrc: "assets/126823__noisecollector__parkinglotdirt.wav", // Son des confettis
+
+      age: 53,                      // Âge affiché dans la scène finale
+      readTime: 2250,               // Durée de lecture d'un bloc (ms)
+
+      // Tous les textes de la séquence : modifiables ici uniquement
+      msgs: {
+        next: "Suivant",
+        suite: "Suite",
+        replay: "Revoir",
+        scene1: {
+          top: "Désolé, j'ai les moyens un peu limités",
+          bottom: "Par contre, j'ai des connaissances",
+        },
+        scene2: {
+          top: "Mirary fahasalamana",
+          bottom: "Mirary fahombiazana sy vintana ihany koa",
+        },
+        scene3: {
+          top: "Mirary harena be",
+          topTranslation: "Je te souhaite de la prospérité",
+          bottom: "Mirary fahasambarana sy fifaliana",
+          bottomTranslation: "Je te souhaite du bonheur et de la joie",
+        },
+        scene4: {
+          title: "Anecdote",
+          part1: "Une année compte parfois 53 semaines au lieu de 52…",
+          part2: "…et 2026, l’année de ton anniversaire, en fait partie selon le calendrier ISO !",
+        },
+        scene5: {
+          joyeux: "Joyeux",
+          ageSuffix: "ème anniversaire",
+          withTenderness: "avec tendresse,",
+        },
+      },
+    };
+
+    const TARGET_VOLUME = 0.8;
+
+    /* ============================================================
+       2. UTILITAIRES
+       ============================================================ */
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+    const pad2 = (value) => String(value).padStart(2, "0");
+    const clamp01 = (value) => Math.min(1, Math.max(0, value));
+
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let reduceMotion = motionQuery.matches;
+    if (typeof motionQuery.addEventListener === "function") {
+      motionQuery.addEventListener("change", (event) => {
+        reduceMotion = event.matches;
+      });
+    }
+
+    /* ============================================================
+       3. INJECTION DU CONTENU
+       ============================================================ */
+    function bindContent() {
+      $$("[data-bind='name']").forEach((el) => { el.textContent = CONFIG.name; });
+      $$("[data-bind='sender']").forEach((el) => { el.textContent = CONFIG.sender; });
+
+      const initial = (CONFIG.sender.trim()[0] || "✦").toUpperCase();
+      $$(".seal-initial").forEach((el) => { el.textContent = initial; });
+
+      const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+      };
+
+      setText("story-1-top", CONFIG.msgs.scene1.top);
+      setText("story-1-bottom", CONFIG.msgs.scene1.bottom);
+      setText("story-2-top", CONFIG.msgs.scene2.top);
+      setText("story-2-bottom", CONFIG.msgs.scene2.bottom);
+      setText("story-3-top", CONFIG.msgs.scene3.top);
+      setText("story-3-top-translation", CONFIG.msgs.scene3.topTranslation);
+      setText("story-3-bottom", CONFIG.msgs.scene3.bottom);
+      setText("story-3-bottom-translation", CONFIG.msgs.scene3.bottomTranslation);
+      setText("anecdote-title", CONFIG.msgs.scene4.title);
+      setText("final-joyeux", CONFIG.msgs.scene5.joyeux);
+      setText("final-age-suffix", CONFIG.msgs.scene5.ageSuffix);
+      setText("final-tenderness", CONFIG.msgs.scene5.withTenderness);
+
+      $$(".js-next-label").forEach((el) => { el.textContent = `${CONFIG.msgs.next} ✦`; });
+      $$(".js-suite-label").forEach((el) => { el.textContent = CONFIG.msgs.suite; });
+      $$(".js-replay-label").forEach((el) => { el.textContent = CONFIG.msgs.replay; });
+
+      document.title = `Joyeux anniversaire, ${CONFIG.name}`;
+    }
+
+    /* ============================================================
+       4. TEMPS — compte à rebours dans le fuseau de CONFIG.timezone
+       ============================================================ */
+    const TIMEZONE = (() => {
+      try {
+        new Intl.DateTimeFormat("en-GB", { timeZone: CONFIG.timezone }).format();
+        return CONFIG.timezone;
+      } catch (error) {
+        console.warn(`Fuseau « ${CONFIG.timezone} » invalide : repli sur UTC.`, error);
+        return "UTC";
+      }
+    })();
+
+    const tzFormatter = new Intl.DateTimeFormat("en-GB", {
+      timeZone: TIMEZONE,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    });
+
+    /** Renvoie l'heure « murale » du fuseau, comme si elle était en UTC. */
+    function timeZoneParts(date) {
+      const parts = Object.fromEntries(
+        tzFormatter.formatToParts(date).map((part) => [part.type, part.value])
+      );
+      return {
+        year: Number(parts.year),
+        month: Number(parts.month),
+        day: Number(parts.day),
+        hour: Number(parts.hour),
+        minute: Number(parts.minute),
+        second: Number(parts.second),
+      };
+    }
+
+    /** Décalage du fuseau (ms) à un instant donné. */
+    function timeZoneOffset(timestamp) {
+      const p = timeZoneParts(new Date(timestamp));
+      const wallClockAsUtc = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
+      const timestampToSecond = Math.floor(timestamp / 1000) * 1000;
+      return wallClockAsUtc - timestampToSecond;
+    }
+
+    /** Instant UTC réel du prochain minuit local. */
+    function nextMidnightUtc(nowMs) {
+      const p = timeZoneParts(new Date(nowMs));
+      const wallClockTarget = Date.UTC(p.year, p.month - 1, p.day + 1, 0, 0, 0);
+
+      // Première estimation, puis correction pour les changements d'heure.
+      let target = wallClockTarget - timeZoneOffset(nowMs);
+      target = wallClockTarget - timeZoneOffset(target);
+      return target;
+    }
+
+    function initCountdown() {
+      const output = $("#countdown");
+      if (!output) return;
+
+      const target = nextMidnightUtc(Date.now());
+
+      const tick = () => {
+        const remaining = target - Date.now();
+
+        if (remaining <= 0) {
+          output.textContent = "Expiré";
+          output.classList.add("is-expired");
+          return false;
+        }
+
+        const totalSeconds = Math.floor(remaining / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        output.textContent = `${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)}`;
+        return true;
+      };
+
+      if (!tick()) return;
+
+      const timer = window.setInterval(() => {
+        if (!tick()) window.clearInterval(timer);
+      }, 1000);
+    }
+
+    /* ============================================================
+       5. AUDIO — déverrouillage mobile, fade-in, mute
+       ============================================================ */
+    const audio = $("#bg-music");
+    const musicToggle = $("#music-toggle");
+    const musicFallback = $("#music-fallback");
+    let audioReady = true;
+    let fadeFrame = 0;
+    let musicRequested = false;
+
+    if (audio) {
+      if (audio.getAttribute("src") !== CONFIG.audioSrc) {
+        audio.src = CONFIG.audioSrc;
+      }
+      audio.volume = 0;
+
+      audio.addEventListener("error", () => {
+        audioReady = false;
+        musicToggle?.classList.add("is-hidden");
+        musicFallback?.classList.add("is-hidden");
+        $("#music-controls")?.classList.add("is-hidden");
+        console.warn(`Musique introuvable ou illisible : ${CONFIG.audioSrc}`);
+      });
+    }
+
+    function setMusicState(isPlaying) {
+      if (!musicToggle) return;
+      musicToggle.classList.toggle("is-muted", !isPlaying);
+      musicToggle.setAttribute("aria-pressed", String(isPlaying));
+      musicToggle.setAttribute("aria-label", isPlaying ? "Couper la musique" : "Activer la musique");
+    }
+
+    function fadeToVolume(target, duration = 600) {
+      if (!audio) return;
+      cancelAnimationFrame(fadeFrame);
+
+      const from = audio.volume;
+      const startedAt = performance.now();
+
+      const step = (now) => {
+        const progress = duration > 0 ? Math.min(1, (now - startedAt) / duration) : 1;
+        audio.volume = clamp01(from + (target - from) * progress);
+        if (progress < 1) fadeFrame = requestAnimationFrame(step);
+      };
+
+      fadeFrame = requestAnimationFrame(step);
+    }
+
+    /**
+     * Déverrouille l'audio pendant le geste utilisateur :
+     * play() puis pause() immédiat, sans son audible.
+     */
+    function unlockAudio() {
+      if (!audio || !audioReady) return;
+
+      try {
+        audio.volume = 0;
+        const attempt = audio.play();
+
+        if (attempt && typeof attempt.then === "function") {
+          attempt
+            .then(() => {
+              // Ne pas interrompre la musique si elle a déjà été lancée entre-temps.
+              if (musicRequested) return;
+              audio.pause();
+              audio.currentTime = 0;
+            })
+            .catch(() => { /* restriction navigateur : sans gravité */ });
+        } else {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      } catch (error) {
+        console.warn("Déverrouillage audio impossible.", error);
+      }
+    }
+
+    function startMusic() {
+      if (!audio || !audioReady) {
+        setMusicState(false);
+        return;
+      }
+
+      musicRequested = true;
+
+      try {
+        audio.currentTime = 0;
+        audio.volume = 0;
+        const attempt = audio.play();
+
+        const onSuccess = () => {
+          musicFallback?.classList.add("is-hidden");
+          setMusicState(true);
+          fadeToVolume(TARGET_VOLUME, 1000);
+        };
+
+        const onFailure = () => {
+          setMusicState(false);
+          musicFallback?.classList.remove("is-hidden");
+        };
+
+        if (attempt && typeof attempt.then === "function") {
+          attempt.then(onSuccess).catch(onFailure);
+        } else {
+          onSuccess();
+        }
+      } catch (error) {
+        console.warn("Lecture audio bloquée.", error);
+        setMusicState(false);
+        musicFallback?.classList.remove("is-hidden");
+      }
+    }
+
+    function initMusicControls() {
+      setMusicState(false);
+
+      musicToggle?.addEventListener("click", () => {
+        if (!audio || !audioReady) return;
+
+        if (audio.paused) {
+          startMusic();
+        } else {
+          audio.pause();
+          setMusicState(false);
+        }
+      });
+
+      musicFallback?.addEventListener("click", startMusic);
+    }
+
+    /* ============================================================
+       6. CONFETTIS
+       ============================================================ */
+    const CONFETTI_COLORS = ["#C9A24D", "#E8704F", "#FAF4E6", "#EFE3C8", "#B8452B", "#8A6A3B", "#F3DFA8"];
+    const CONFETTI_VOICES = 5;
+    const confettiVoices = [];
+    let confettiVoiceIndex = 0;
+
+    function initConfettiSound() {
+      for (let index = 0; index < CONFETTI_VOICES; index += 1) {
+        const voice = new Audio(CONFIG.confettiSrc);
+        voice.preload = "auto";
+        voice.volume = 0.55;
+        confettiVoices.push(voice);
+      }
+    }
+
+    function playConfettiSound() {
+      if (!confettiVoices.length) return;
+
+      const voice = confettiVoices[confettiVoiceIndex % confettiVoices.length];
+      confettiVoiceIndex += 1;
+
+      try {
+        voice.currentTime = 0;
+        const attempt = voice.play();
+        if (attempt && typeof attempt.catch === "function") {
+          attempt.catch(() => { /* lecture bloquée : sans gravité */ });
+        }
+      } catch (error) {
+        console.warn("Son des confettis indisponible.", error);
+      }
+    }
+
+    function burstConfetti({ particleCount = 80, ...options } = {}) {
+      if (typeof window.confetti !== "function") return;
+
+      playConfettiSound();
+
+      window.confetti({
+        zIndex: 9999,
+        origin: { x: 0.5, y: 0.55 },
+        colors: CONFETTI_COLORS,
+        ...options,
+        particleCount: reduceMotion ? Math.max(12, Math.round(particleCount * 0.3)) : particleCount,
+        startVelocity: options.startVelocity ?? (reduceMotion ? 22 : 42),
+        ticks: options.ticks ?? (reduceMotion ? 120 : 220),
+      });
+    }
+
+    function celebrateIntro() {
+      burstConfetti({ origin: { x: 0.5, y: 0.6 }, particleCount: 110, spread: 78 });
+
+      if (reduceMotion) return;
+
+      window.setTimeout(() => {
+        burstConfetti({ origin: { x: 0.04, y: 0.78 }, angle: 60, spread: 55, particleCount: 70 });
+      }, 160);
+
+      window.setTimeout(() => {
+        burstConfetti({ origin: { x: 0.96, y: 0.78 }, angle: 120, spread: 55, particleCount: 70 });
+      }, 300);
+
+      window.setTimeout(() => {
+        burstConfetti({ origin: { x: 0.5, y: 0.34 }, particleCount: 80, spread: 100 });
+      }, 440);
+    }
+
+    /* ============================================================
+       7. NAVIGATION ENTRE SCÈNES
+       ============================================================ */
+    const SCENE_IDS = [
+      "scene-gift",
+      "scene-pin",
+      "scene-final",
+      "scene-story-1",
+      "scene-story-2",
+      "scene-story-3",
+      "scene-story-4",
+      "scene-story-5",
+    ];
+    const STORY_ORDER = [
+      "scene-story-1",
+      "scene-story-2",
+      "scene-story-3",
+      "scene-story-4",
+      "scene-story-5",
+    ];
+
+    let activeScene = "scene-gift";
+    let introOpened = false;
+    let finalOpened = false;
+
+    function goTo(sceneId) {
+      if (!SCENE_IDS.includes(sceneId) || sceneId === activeScene) return;
+
+      const current = document.getElementById(activeScene);
+      const next = document.getElementById(sceneId);
+      if (!current || !next) return;
+
+      cancelSceneWork();
+
+      if (current.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
+
+      next.scrollTop = 0;
+      next.classList.add("is-active");
+      next.removeAttribute("inert");
+      next.setAttribute("aria-hidden", "false");
+
+      current.classList.remove("is-active");
+      current.setAttribute("inert", "");
+      current.setAttribute("aria-hidden", "true");
+
+      activeScene = sceneId;
+      onSceneEnter(sceneId);
+    }
+
+    function onSceneEnter(sceneId) {
+      if (sceneId === "scene-pin") {
+        resetPin();
+
+        // La musique démarre dès l'affichage de l'écran du code.
+        if (audioReady) {
+          $("#music-controls")?.classList.remove("is-hidden");
+        }
+        startMusic();
+
+        window.setTimeout(() => pinInputs[0]?.focus(), 450);
+      }
+
+      if (sceneId === "scene-final") {
+        window.setTimeout(openFinalGift, 480);
+      }
+
+      if (sceneId.startsWith("scene-story-")) {
+        prepareStoryScene(sceneId);
+      }
+    }
+
+    function initGift() {
+      const trigger = $("#gift-trigger");
+      if (!trigger) return;
+
+      trigger.addEventListener("click", () => {
+        if (introOpened) return;
+        introOpened = true;
+
+        unlockAudio();
+        celebrateIntro();
+        window.setTimeout(() => goTo("scene-pin"), 280);
+      });
+    }
+
+    /* ============================================================
+       8. CADEAU — couvercle, confettis, départ de la séquence
+       ============================================================ */
+    function openFinalGift() {
+      if (finalOpened) return;
+      finalOpened = true;
+
+      const scene = document.getElementById("scene-final");
+      scene?.classList.add("is-open");
+
+      // Après la fin des confettis, le rideau ouvre l'histoire.
+      window.setTimeout(beginSequence, 4200);
+
+      const gift = $(".final-gift");
+
+      window.setTimeout(() => {
+        let origin = { x: 0.5, y: 0.45 };
+
+        if (gift) {
+          const rect = gift.getBoundingClientRect();
+          origin = {
+            x: clamp01((rect.left + rect.width / 2) / window.innerWidth),
+            y: clamp01((rect.top + rect.height * 0.38) / window.innerHeight),
+          };
+        }
+
+        burstConfetti({
+          origin,
+          particleCount: 100,
+          spread: 85,
+          startVelocity: 38,
+          scalar: 0.95,
+        });
+
+        if (reduceMotion) return;
+
+        window.setTimeout(() => {
+          burstConfetti({ origin, angle: 60, spread: 60, particleCount: 60 });
+        }, 180);
+
+        window.setTimeout(() => {
+          burstConfetti({ origin, angle: 120, spread: 60, particleCount: 60 });
+        }, 330);
+      }, 200);
+    }
+
+    /* ============================================================
+       8b. SÉQUENCE — rideau, lecture, scènes 1 à 4
+       ============================================================ */
+    const curtain = $("#curtain");
+    let sequenceBusy = false;
+    let sequenceStarted = false;
+    let curtainClosed = false;
+
+    let storyTimers = new Set();
+    let typeTimer = 0;
+    let typeRun = 0;
+    let ageFrame = 0;
+
+    function curtainDuration() {
+      return reduceMotion ? 350 : 1200;
+    }
+
+    function wait(ms) {
+      return new Promise((resolve) => window.setTimeout(resolve, ms));
+    }
+
+    /** Ferme le rideau. Résout quand les deux panneaux sont en place. */
+    function closeCurtain() {
+      if (!curtain || curtainClosed) return Promise.resolve();
+      curtainClosed = true;
+      curtain.classList.add("is-closed");
+      return wait(curtainDuration());
+    }
+
+    /** Ouvre le rideau. Résout quand les panneaux sont hors champ. */
+    function openCurtain() {
+      if (!curtain || !curtainClosed) return Promise.resolve();
+      curtainClosed = false;
+      curtain.classList.remove("is-closed");
+      return wait(curtainDuration());
+    }
+
+    function later(fn, delay) {
+      const id = window.setTimeout(() => {
+        storyTimers.delete(id);
+        fn();
+      }, delay);
+      storyTimers.add(id);
+      return id;
+    }
+
+    function cancelSceneWork() {
+      storyTimers.forEach((id) => window.clearTimeout(id));
+      storyTimers.clear();
+      window.clearTimeout(typeTimer);
+      typeTimer = 0;
+      typeRun += 1;
+      if (ageFrame) {
+        cancelAnimationFrame(ageFrame);
+        ageFrame = 0;
+      }
+      $$(".anecdote-line").forEach((line) => line.classList.remove("is-typing"));
+    }
+
+    function setButtonVisible(button, visible) {
+      if (!button) return;
+      button.classList.toggle("is-visible", visible);
+      button.setAttribute("aria-hidden", String(!visible));
+      button.tabIndex = visible ? 0 : -1;
+    }
+
+    function hideAllStoryButtons() {
+      $$(".story-next, .anecdote-more, #replay-btn").forEach((button) => {
+        setButtonVisible(button, false);
+      });
+    }
+
+    function prepareStoryScene(sceneId) {
+      const scene = document.getElementById(sceneId);
+      if (!scene) return;
+
+      scene.classList.remove("is-playing");
+      hideAllStoryButtons();
+
+      if (sceneId === "scene-story-1" || sceneId === "scene-story-2" || sceneId === "scene-story-3") {
+        $$(".story-card--reveal", scene).forEach((card) => card.classList.remove("is-visible"));
+      }
+
+      if (sceneId === "scene-story-4") {
+        $$(".anecdote-line", scene).forEach((line) => {
+          line.classList.remove("is-typing");
+          const target = $(".type-target", line);
+          if (target) target.textContent = "";
+        });
+        $(".anecdote-line--second", scene)?.classList.add("is-hidden");
+        setButtonVisible($(".anecdote-more", scene), false);
+      }
+
+      if (sceneId === "scene-story-5") {
+        const number = $("#age-number");
+        if (number) {
+          number.textContent = "0";
+          number.classList.remove("is-counting");
+        }
+        setButtonVisible($("#replay-btn"), false);
+      }
+    }
+
+    function startStoryScene(sceneId) {
+      if (activeScene !== sceneId) return;
+      const scene = document.getElementById(sceneId);
+      if (!scene) return;
+
+      scene.classList.add("is-playing");
+
+      if (sceneId === "scene-story-1" || sceneId === "scene-story-2" || sceneId === "scene-story-3") {
+        const bottom = $(".story-card--reveal", scene);
+        const next = $(".story-next", scene);
+        const nextImmediately = sceneId === "scene-story-3";
+
+        setButtonVisible(next, nextImmediately);
+
+        later(() => {
+          bottom?.classList.add("is-visible");
+          if (nextImmediately) return;
+
+          later(() => {
+            if (activeScene !== sceneId) return;
+            setButtonVisible(next, true);
+          }, CONFIG.readTime);
+        }, CONFIG.readTime);
+        return;
+      }
+
+      if (sceneId === "scene-story-4") {
+        startAnecdote();
+        return;
+      }
+
+      if (sceneId === "scene-story-5") {
+        startAge();
+      }
+    }
+
+    async function transitionTo(sceneId) {
+      if (sequenceBusy) return;
+
+      sequenceBusy = true;
+      cancelSceneWork();
+      hideAllStoryButtons();
+
+      await closeCurtain();
+      goTo(sceneId);
+      await openCurtain();
+
+      sequenceBusy = false;
+      startStoryScene(sceneId);
+    }
+
+    function beginSequence() {
+      if (sequenceStarted) return;
+      sequenceStarted = true;
+      transitionTo("scene-story-1");
+    }
+
+    function handleNext() {
+      if (sequenceBusy) return;
+      const index = STORY_ORDER.indexOf(activeScene);
+      if (index < 0 || index >= STORY_ORDER.length - 1) return;
+
+      const currentButton = $(`.story-next`, document.getElementById(activeScene));
+      if (!currentButton || !currentButton.classList.contains("is-visible")) return;
+
+      setButtonVisible(currentButton, false);
+      transitionTo(STORY_ORDER[index + 1]);
+    }
+
+    /* ---------- Machine à écrire (scène 4) ---------- */
+    function typeText(line, target, text, speed, done) {
+      if (!line || !target) {
+        done?.();
+        return;
+      }
+
+      const run = ++typeRun;
+      window.clearTimeout(typeTimer);
+      target.textContent = "";
+      line.classList.add("is-typing");
+
+      if (reduceMotion) {
+        target.textContent = text;
+        line.classList.remove("is-typing");
+        done?.();
+        return;
+      }
+
+      let index = 0;
+      const step = () => {
+        if (run !== typeRun) return;
+        target.textContent += text[index] ?? "";
+        index += 1;
+
+        if (index < text.length) {
+          typeTimer = window.setTimeout(step, speed);
+        } else {
+          line.classList.remove("is-typing");
+          done?.();
+        }
+      };
+
+      step();
+    }
+
+    function startAnecdote() {
+      const scene = document.getElementById("scene-story-4");
+      if (!scene) return;
+
+      const line = $(".anecdote-line", scene);
+      const target = $("#anecdote-part1");
+      typeText(line, target, CONFIG.msgs.scene4.part1, 26, () => {
+        if (activeScene !== "scene-story-4") return;
+        setButtonVisible($(".anecdote-more", scene), true);
+      });
+    }
+
+    function handleSuite() {
+      if (sequenceBusy || activeScene !== "scene-story-4") return;
+
+      const scene = document.getElementById("scene-story-4");
+      const suite = $(".anecdote-more", scene);
+      if (!suite || !suite.classList.contains("is-visible")) return;
+
+      setButtonVisible(suite, false);
+
+      const line = $(".anecdote-line--second", scene);
+      line?.classList.remove("is-hidden");
+      typeText(line, $("#anecdote-part2"), CONFIG.msgs.scene4.part2, 24, () => {
+        if (activeScene !== "scene-story-4") return;
+        later(() => {
+          if (activeScene !== "scene-story-4") return;
+          setButtonVisible($(".story-next", scene), true);
+        }, CONFIG.readTime);
+      });
+    }
+
+    /* ---------- Compteur final (scène 5) ---------- */
+    function startAge() {
+      const number = $("#age-number");
+      if (!number) return;
+
+      window.clearTimeout(typeTimer);
+      if (ageFrame) cancelAnimationFrame(ageFrame);
+      ageFrame = 0;
+      number.textContent = "0";
+      number.classList.remove("is-counting");
+      void number.offsetWidth;
+
+      if (reduceMotion) {
+        number.textContent = String(CONFIG.age);
+        finishAge();
+        return;
+      }
+
+      number.classList.add("is-counting");
+      const startedAt = performance.now();
+      const duration = 2000;
+      const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+      const tick = (now) => {
+        if (activeScene !== "scene-story-5") return;
+        const progress = Math.min(1, (now - startedAt) / duration);
+        number.textContent = String(Math.round(easeOutCubic(progress) * CONFIG.age));
+
+        if (progress < 1) {
+          ageFrame = requestAnimationFrame(tick);
+        } else {
+          ageFrame = 0;
+          number.textContent = String(CONFIG.age);
+          finishAge();
+        }
+      };
+
+      ageFrame = requestAnimationFrame(tick);
+    }
+
+    function finishAge() {
+      if (activeScene !== "scene-story-5") return;
+
+      burstConfetti({
+        origin: { x: 0.5, y: 0.44 },
+        particleCount: 120,
+        spread: 105,
+        startVelocity: 46,
+        colors: ["#C9A24D", "#E8704F", "#F3DFA8", "#B8452B", "#E6C77A"],
+      });
+
+      if (!reduceMotion) {
+        later(() => {
+          burstConfetti({
+            origin: { x: 0.5, y: 0.44 },
+            angle: 60,
+            spread: 70,
+            particleCount: 55,
+            startVelocity: 38,
+            colors: ["#C9A24D", "#E8704F", "#F3DFA8"],
+          });
+        }, 170);
+
+        later(() => {
+          burstConfetti({
+            origin: { x: 0.5, y: 0.44 },
+            angle: 120,
+            spread: 70,
+            particleCount: 55,
+            startVelocity: 38,
+            colors: ["#C9A24D", "#E8704F", "#F3DFA8"],
+          });
+        }, 340);
+      }
+
+      later(() => {
+        if (activeScene !== "scene-story-5") return;
+        setButtonVisible($("#replay-btn"), true);
+      }, 750);
+    }
+
+    function handleReplay() {
+      if (sequenceBusy || activeScene !== "scene-story-5") return;
+      const replay = $("#replay-btn");
+      if (!replay || !replay.classList.contains("is-visible")) return;
+      setButtonVisible(replay, false);
+      transitionTo("scene-story-1");
+    }
+
+    function initStory() {
+      $$(".story-next").forEach((button) => button.addEventListener("click", handleNext));
+      $(".anecdote-more")?.addEventListener("click", handleSuite);
+      $("#replay-btn")?.addEventListener("click", handleReplay);
+    }
+
+    /* ============================================================
+       9. CODE PIN
+       ============================================================ */
+    const pinFields = $("#pin-fields");
+    const pinInputs = $$(".pin-field");
+    const pinStatus = $("#pin-status");
+    const pinSubmit = $("#pin-submit");
+    let pinLocked = false;
+
+    function readPin() {
+      return pinInputs.map((input) => input.value).join("");
+    }
+
+    function resetPin() {
+      pinLocked = false;
+      pinInputs.forEach((input) => {
+        input.value = "";
+        input.disabled = false;
+        input.removeAttribute("aria-invalid");
+      });
+      pinFields?.classList.remove("is-error");
+      if (pinStatus) {
+        pinStatus.textContent = "";
+        pinStatus.classList.remove("is-success");
+      }
+    }
+
+    function focusFirstEmptyPin() {
+      const empty = pinInputs.find((input) => !input.value) || pinInputs[pinInputs.length - 1];
+      empty?.focus();
+    }
+
+    function failPin() {
+      if (pinLocked) return;
+      pinLocked = true;
+
+      pinFields?.classList.remove("is-error");
+      void pinFields?.offsetWidth; // force le reflow pour rejouer l'animation
+      pinFields?.classList.add("is-error");
+
+      if (pinStatus) {
+        pinStatus.textContent = "Ce code ne semble pas être le bon.";
+        pinStatus.classList.remove("is-success");
+      }
+
+      if (typeof navigator.vibrate === "function") {
+        navigator.vibrate(100);
+      }
+
+      window.setTimeout(() => {
+        pinFields?.classList.remove("is-error");
+        pinInputs.forEach((input) => { input.value = ""; });
+        pinLocked = false;
+        pinInputs[0]?.focus();
+      }, 430);
+    }
+
+    function validatePin() {
+      if (pinLocked) return;
+
+      const code = readPin();
+
+      if (code.length !== 4) {
+        if (pinStatus) pinStatus.textContent = "Les quatre chiffres sont nécessaires.";
+        focusFirstEmptyPin();
+        return;
+      }
+
+      const expected = String(CONFIG.birthday).padStart(4, "0");
+
+      if (code === expected) {
+        pinLocked = true;
+        pinInputs.forEach((input) => { input.disabled = true; });
+        if (pinStatus) {
+          pinStatus.textContent = "C'est le bon code…";
+          pinStatus.classList.add("is-success");
+        }
+
+        window.setTimeout(() => goTo("scene-final"), 520);
+      } else {
+        failPin();
+      }
+    }
+
+    function initPin() {
+      if (!pinInputs.length) return;
+
+      pinInputs.forEach((input, index) => {
+        input.addEventListener("input", () => {
+          const digits = input.value.replace(/\D/g, "");
+          input.value = digits.slice(-1);
+
+          if (input.value && index < pinInputs.length - 1) {
+            pinInputs[index + 1].focus();
+          }
+
+          if (readPin().length === 4) {
+            window.setTimeout(validatePin, 140);
+          }
+        });
+
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Backspace" && !input.value && index > 0) {
+            event.preventDefault();
+            pinInputs[index - 1].value = "";
+            pinInputs[index - 1].focus();
+          }
+
+          if (event.key === "ArrowLeft" && index > 0) {
+            event.preventDefault();
+            pinInputs[index - 1].focus();
+          }
+
+          if (event.key === "ArrowRight" && index < pinInputs.length - 1) {
+            event.preventDefault();
+            pinInputs[index + 1].focus();
+          }
+
+          if (event.key === "Enter") {
+            event.preventDefault();
+            validatePin();
+          }
+        });
+
+        input.addEventListener("focus", () => input.select());
+      });
+
+      // Collage d'un code complet depuis le presse-papiers
+      pinFields?.addEventListener("paste", (event) => {
+        const digits = (event.clipboardData?.getData("text") || "").replace(/\D/g, "");
+        if (!digits) return;
+
+        event.preventDefault();
+        const sliced = digits.slice(0, 4).split("");
+
+        pinInputs.forEach((input, index) => {
+          input.value = sliced[index] ?? "";
+        });
+
+        pinInputs[Math.min(sliced.length, pinInputs.length - 1)]?.focus();
+
+        if (sliced.length === 4) {
+          window.setTimeout(validatePin, 140);
+        }
+      });
+
+      pinSubmit?.addEventListener("click", validatePin);
+    }
+
+    /* ============================================================
+       10. INITIALISATION
+       ============================================================ */
+    function init() {
+      bindContent();
+      initGift();
+      initPin();
+      initMusicControls();
+      initConfettiSound();
+      initStory();
+      initCountdown();
+    }
+
+    init();
+  </script>
 </body>
 </html>
